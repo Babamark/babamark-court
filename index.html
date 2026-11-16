@@ -263,6 +263,23 @@ button{cursor:pointer;border:0;background:none}
 .page footer .logo{width:200px}
 .bar{padding:14px 30px}.bar .next{font-size:16px;padding:11px 14px;flex-basis:240px}
 }
+
+/* ---------- phones and tablets: proportions ---------- */
+@media (max-width:959px){
+.hud{position:absolute;inset:0 0 auto 0}
+.stage svg{scale:1.24}
+.game:not(.playing) .stage svg{scale:1.34;translate:0 10px}
+.snd{background:#000;padding:4px 6px}
+.title h1{font-size:min(9.6vw,56px);gap:.4em;margin-bottom:.35em}
+.title h1 .logo{width:5.3em}
+.emb{height:2.25em}
+.say,.last{height:clamp(150px,30vh,300px)}
+.panel{padding:18px 18px calc(18px + env(safe-area-inset-bottom))}
+.acts .next{flex:1 1 0;min-width:0;padding:12px 10px}
+.bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+}
+@media (max-width:959px) and (max-height:700px){.title h1{font-size:min(8.4vw,44px);margin-bottom:.5em}.title h1 .logo{width:5.3em}.emb{height:2.25em}}
+@media (max-width:520px){.title textarea{height:104px}.attach .note{flex:1 1 0}.row{gap:10px}.size{flex:1 1 100%}.go{flex:1 1 100%;padding:13px 22px}}
 </style>
 </head>
 <body>
@@ -711,6 +728,7 @@ $("demo").onclick=function(){begin(true)};
   [].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-pressed",x===b)});if(!S)build(nJ)}});
 [].forEach.call(document.querySelectorAll("#jset button"),function(b){b.onclick=function(){jSet=b.dataset.j;
   [].forEach.call(document.querySelectorAll("#jset button"),function(x){x.setAttribute("aria-pressed",x===b)})}});
+if(window.matchMedia("(max-width:520px)").matches){$("case").placeholder="למשל: ריטיינר סושיאל לרשת מסעדות, 12,000 ₪ בחודש, בלי התחייבות. כדאי לכתוב מספרים ולוח זמנים.";var nt=document.querySelector(".attach .note");if(nt)nt.textContent=nt.textContent.replace(" אפשר גם לגרור לכאן.","")}
 try{var sv=localStorage.getItem("court-case");if(sv)$("case").value=sv}catch(e){}
 
 var DEMO={c:"דוגמה: להציע לרשת המבורגרים ריטיינר חודשי של סושיאל, יום צילום וקמפיינים במטא, בלי תקופת התחייבות.\nתיק לדוגמה, כל הפרטים בדויים. לרשת 4 סניפים. היום הם מעלים תוכן לבד, בלי תקציב פרסום קבוע. ההצעה לא כוללת יעדים מספריים.",
