@@ -184,7 +184,7 @@ button{cursor:pointer;border:0;background:none}
 .bar .next{flex:0 1 220px;min-width:0;white-space:nowrap;padding:9px 10px;font-size:15px}
 @media (min-width:800px){.sentence{margin-inline:0;padding-inline:30px}.hud{padding:18px 28px}.panel{padding:20px 28px 24px}}
 @media (max-width:520px){.steps li:not(.now){display:none}.title textarea{height:100px}}
-@media (max-height:700px){.title .sub{display:none}.title h1{margin-bottom:12px;font-size:26px}.title h1 .logo{width:150px}.emb{height:72px}}
+@media (max-height:700px) and (max-width:959px){.title .sub{display:none}.title h1{margin-bottom:12px;font-size:26px}.title h1 .logo{width:150px}.emb{height:72px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}#cam{transition:none}}
 .stage svg{animation:drift 14s ease-in-out infinite alternate}
 @keyframes drift{from{transform:translate(-5px,2px)}to{transform:translate(6px,-3px)}}
@@ -217,6 +217,52 @@ button{cursor:pointer;border:0;background:none}
 .fx{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
 .fx i{position:absolute;top:-24px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(112vh) rotate(600deg)}}
+
+/* ---------- desktop: scene and text side by side ---------- */
+@media (min-width:960px){
+.game{display:grid;grid-template-columns:minmax(460px,.84fr) minmax(0,1.16fr);grid-template-rows:100%;grid-template-areas:"panel stage"}
+.stage{grid-area:stage;min-height:0}
+.hud{grid-area:stage;align-self:start;padding:22px 30px}
+.hud .logo{width:132px}
+.steps,.snd{font-size:14px}
+.steps li{padding:4px 12px}
+.panel{grid-area:panel;max-height:none;height:100%;border-top:0;border-inline-end:1px solid var(--white);display:flex;flex-direction:column;padding:clamp(28px,3.6vw,68px);font-size:clamp(17px,1.22vw,22px)}
+.panel-in{width:100%;max-width:640px;margin:auto}
+.title h1{font-size:clamp(40px,3.5vw,66px);gap:.4em;margin-bottom:.3em}
+.title h1 .logo{width:5.3em}
+.emb{height:2.25em}
+.title .sub{margin:.9em 0 1.6em;font-size:1.06em;max-width:38ch}
+.title label{margin-bottom:.5em}
+.title textarea{height:clamp(130px,21vh,230px);padding:.75em .9em}
+.pick,.size button,.attach .note,.hint,.link,.what,.score{font-size:.84em}
+.pick{padding:.6em 1.1em}.size button{padding:.7em 1.1em}
+.attach{margin-top:.8em}.hint{margin-top:.6em}.row{margin-top:1em;gap:.8em}
+.go{font-size:1.08em;padding:.72em 1.4em}
+.link{margin-top:.6em}
+.who{margin-bottom:1em;gap:.8em}
+.tag{font-size:1.1em;padding:.15em .7em}
+.say,.last{height:clamp(240px,48vh,560px);font-size:clamp(19px,1.45vw,26px);line-height:1.55}
+.say small{font-size:.8em}
+.acts{margin-top:1.4em;justify-content:flex-end;flex-direction:row-reverse}
+.next{font-size:1em;padding:.62em 1.7em}
+.page{max-width:min(1040px,84vw);padding:40px 0 140px;font-size:clamp(17px,1.2vw,21px)}
+.page header p,.legend,.record dt,.jl .flip,.lead label,.lead .fine{font-size:.85em}
+.page header .logo{width:140px}
+.verdict{padding:56px 0 44px}
+.verdict h2{font-size:1em}
+.seats{gap:8px}.seats i{max-width:64px}
+.record{grid-template-columns:6em 1fr;padding:28px 0}
+.page h3{font-size:1.7em;margin:60px 0 20px}
+.jl{display:grid;grid-template-columns:1fr 1fr;column-gap:48px}
+.jl h4{font-size:1em}.jl b{font-size:.8em}
+.rl li{padding:18px 0}.rl li::before{font-size:1.8em}
+.sentence{margin-top:64px;padding:36px 40px 40px}
+.sentence h3{margin:0 0 14px}.sentence p{font-size:1.25em}
+.lead input,.lead select,.lead textarea{font-size:1em;padding:.65em .8em}
+.lead .done{font-size:1.2em}
+.page footer .logo{width:200px}
+.bar{padding:14px 30px}.bar .next{font-size:16px;padding:11px 14px;flex-basis:240px}
+}
 </style>
 </head>
 <body>
