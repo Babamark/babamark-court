@@ -668,7 +668,7 @@ $("quit").onclick=function(){leave("")};
 
 /* ---------- title ---------- */
 var hint=$("hint"),HINT0="המושבעים יודעים רק מה שכתוב כאן ובקבצים.",HINT=HINT0;$("jsize").hidden=true;
-if(CODE){nJ=12;HINT="הוזמנתם למשפט מלא, מול 12 מושבעים.";hint.textContent=HINT}
+nJ=12;if(CODE){HINT="נכנסתם עם הזמנה אישית מבאבמרק.";hint.textContent=HINT}
 function leave(msg){
   if(S){S.dead=true;try{S.abort.abort()}catch(e){}}S=null;step=-1;drone(0);beat(false);$("fx").textContent="";$("card").classList.remove("show");document.querySelector(".dialog").classList.remove("typing");$("last").value="";
   $("sheet").classList.remove("show");$("slam").className="slam";$("game").classList.remove("playing","shake");
@@ -720,7 +720,7 @@ $("go").onclick=function(){
   b.disabled=true;b.textContent="פותח את בית המשפט";
   post({op:"start",code:CODE}).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
     if(CODE&&r.jury<12){CODE="";try{localStorage.removeItem("court-code")}catch(e){}HINT=HINT0}
-    nJ=r.jury||6;track("CourtTrial");begin(false,g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
+    nJ=12;track("CourtTrial");begin(false,g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
     hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח את בית המשפט. בדקו את החיבור ונסו שוב.";hint.className="hint warn"});
 };
 $("demo").onclick=function(){begin(true)};
