@@ -614,7 +614,7 @@ function openSheet(){
 }
 var MAIL="ab@babamark.com";
 function leadForm(p){
-  var t=S.tally,sec=h("section","lead",null,p),me=S;
+  var t=S.tally,sec=h("section","lead",null,p),me=S;wfPrep();
   h("h3","",t.cls==="acquitted"?"רוצים להוציא את זה לפועל?":t.cls==="cond"?"רוצים עזרה לעמוד בתנאים?":"רוצים שנייצג את הרעיון?",sec);
   h("p","",t.cls==="acquitted"?"השאירו פרטים והצוות של באבמרק יחזור אליכם עם מחשבה ראשונה על התיק. התיק ופסק הדין נשלחים יחד עם הפרטים.":"השאירו פרטים והצוות של באבמרק יעבור איתכם על מה שהמושבעים סימנו ויעזור לבנות תיק חזק יותר. התיק ופסק הדין נשלחים יחד עם הפרטים.",sec);
   var f=h("form","",null,sec);f.noValidate=true;
@@ -641,7 +641,15 @@ function leadForm(p){
       msg.appendChild(document.createTextNode(" או "));var c=h("button","link","העתיקו את הפרטים והדביקו במייל",msg);c.type="button";
       c.onclick=function(){try{navigator.clipboard.writeText(body).then(function(){c.textContent="הועתק"},function(){c.textContent="ההעתקה נחסמה"})}catch(x){c.textContent="ההעתקה נחסמה"}}})};
 }
-function saveLead(lead){
+var WF=null;
+function wfPrep(){if(WF||location.protocol==="file:")return;try{var f=document.createElement("iframe");f.src="/contact";f.setAttribute("aria-hidden","true");f.tabIndex=-1;f.style.cssText="position:fixed;left:0;top:0;width:420px;height:900px;opacity:0;pointer-events:none;border:0;z-index:-1";document.body.appendChild(f);WF=f}catch(e){}}
+function wfSend(lead){try{if(!WF)return;var d=WF.contentDocument,fm=d&&d.querySelector("form#email-form");if(!fm)return;
+  var set=function(n,v){var e=fm.querySelector('[name="'+n+'"]');if(e){e.value=v;e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}))}};
+  var msg=["ליד מבית המשפט של באבמרק","פסק הדין: "+lead.verdict,"תקציב משוער: "+(lead.budget||"לא צוין"),"מטרה: "+(lead.goals||"לא צוינה")];if(!lead.email)msg.push("מייל: לא נמסר");msg.push("","הרעיון:",String(lead.case||"").slice(0,1500));
+  set("name",lead.name);set("email",lead.email||"court-lead@babamark.com");set("number",lead.phone);set("message",msg.join("\n"));
+  var go=function(n){var tk=fm.querySelector('[name="cf-turnstile-response"]');if(tk&&!tk.value&&n>0){setTimeout(function(){go(n-1)},1000);return}
+    var b=fm.querySelector('input[type="submit"],button[type="submit"]');if(b)b.click();var w=WF;WF=null;setTimeout(function(){try{w.remove()}catch(e){}},15000)};go(12)}catch(e){}}
+function saveLead(lead){wfSend(lead);
   return Promise.race([post({op:"lead",trial:lead.trial,name:lead.name,phone:lead.phone,email:lead.email,budget:lead.budget,goals:lead.goals,case:lead.case,verdict:lead.verdict,ruling:lead.ruling,lastWord:lead.lastWord,jury:lead.jury}),new Promise(function(_,rej){setTimeout(rej,12000)})]).then(function(r){track("CourtLead");try{if(window.fbq)window.fbq("track","Lead")}catch(e){}return r});
 }
 function asText(){var t=S.tally,o=["פסק הדין: "+t.line,"","התיק: "+S.show,"",clean(S.t.judge).replace(/^##\s*/gm,""),"","המושבעים:"];
