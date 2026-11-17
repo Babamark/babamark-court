@@ -421,6 +421,8 @@ function hop(g){g.classList.remove("hop");void g.getBoundingClientRect();g.class
 
 /* ---------- sound ---------- */
 var ac=null,sndOn=true;
+function unlock(){try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}try{if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();var b=ac.createBuffer(1,1,22050),n=ac.createBufferSource();n.buffer=b;n.connect(ac.destination);n.start(0)}if(ac.state!=="running")ac.resume()}catch(e){}}
+["pointerdown","touchend","click","keydown"].forEach(function(ev){document.addEventListener(ev,unlock,{capture:true,passive:true})});document.addEventListener("visibilitychange",function(){if(!document.hidden&&ac&&ac.state!=="running")try{ac.resume()}catch(e){}});
 function tone(f,t,type,vol,slide){
   if(!sndOn||!ac)return;try{var o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;
   o.type=type||"sine";o.frequency.setValueAtTime(f,n);if(slide)o.frequency.exponentialRampToValueAtTime(slide,n+t);
