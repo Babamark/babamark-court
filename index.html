@@ -284,6 +284,7 @@ button{cursor:pointer;border:0;background:none}
 .game.asking .title{display:none}.intake .iwhy{font-size:1.1em;font-weight:500;line-height:1.45;margin-bottom:.9em;max-width:46ch}.intake .iwhy.wait{color:var(--grey);font-weight:400}.intake .iwhy.wait::after{content:"";display:inline-block;width:.55em;height:1em;margin-inline-start:4px;background:var(--grey);vertical-align:-.15em;animation:blink 1s steps(2) infinite}.iq{padding:.75em 0;border-top:1px solid var(--rule)}.iq label{display:block;font-weight:700;margin-bottom:.45em;line-height:1.4}.iq .ia{display:flex;gap:8px;align-items:stretch}.iq textarea{flex:1;min-width:0;height:3.4em;resize:none;background:#000;color:#fff;border:1.5px solid var(--white);border-radius:0;padding:.45em .65em;font:inherit;font-size:16px;line-height:1.4}.iq textarea:disabled{border-color:var(--rule);color:var(--grey)}.iq .idk{flex:0 0 auto;font-size:14px;padding:0 12px;box-shadow:inset 0 0 0 1.5px var(--rule);color:#d9dbe1}.iq .idk[aria-pressed=true]{background:var(--white);color:var(--black);box-shadow:none;font-weight:700}.iq.miss textarea{border-color:var(--blue);box-shadow:0 0 0 1.5px var(--blue)}@media (max-width:959px){.game.asking .stage{flex:0 0 96px;min-height:96px}.game.asking .panel{max-height:none;flex:1 1 auto}.game.asking .stage svg{scale:1}}
 .lead .fine{color:#d9dbe1}.lead .meet{display:inline-block;margin-top:18px;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:12px 28px}@media (max-width:520px){.lead .fine{grid-column:1/-1}.lead .meet{display:block;text-align:center}}
 .priv{font-size:14px;line-height:1.5;color:#d9dbe1;margin-top:8px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--rule);max-width:52ch}
+.page footer .meet2{direction:rtl;margin-top:10px;color:#fff;font-weight:700;text-decoration:none;padding:11px 26px;box-shadow:inset 0 0 0 1.5px var(--white)}.page footer .meet2:hover{background:var(--white);color:var(--black)}
 </style>
 </head>
 <body>
@@ -604,7 +605,7 @@ function openSheet(){
     if(r.flip){var f=h("p","flip",null,dv);h("span","","מה היה הופך את ההצבעה",f);f.appendChild(document.createTextNode(r.flip))}});
   if(sen){var sc=h("section","sentence",null,p);h("h3","",sen.title,sc);h("p","",sen.paras.concat(sen.items).join(" "),sc)}
   if(!S.demo)leadForm(p);
-  var ft=h("footer","",null,p);h("span","logo",null,ft);h("p","en tag2","WE MAKE THINGS HAPPEN",ft);h("p","links","@we.make.things.happen · babamark.com",ft);
+  var ft=h("footer","",null,p);h("span","logo",null,ft);h("p","en tag2","WE MAKE THINGS HAPPEN",ft);h("p","links","@we.make.things.happen · babamark.com",ft);var mt=h("a","meet2","הכירו את באבמרק",ft);mt.href="https://www.babamark.com/";mt.onclick=function(){track("CourtMeet")};
   $("sheet").classList.add("show");$("sheet").scrollTop=0;
 }
 var MAIL="ab@babamark.com";
