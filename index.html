@@ -439,8 +439,26 @@ var dr=null;
 function drone(f){try{if(!ac)return;if(!f){if(dr){dr.g.gain.linearRampToValueAtTime(0,ac.currentTime+.4);var o=dr;dr=null;setTimeout(function(){o.a.stop();o.b.stop()},600)}return}
   if(!dr){var g=ac.createGain(),a=ac.createOscillator(),b=ac.createOscillator();g.gain.value=0;a.connect(g);b.connect(g);g.connect(ac.destination);a.start();b.start();dr={g:g,a:a,b:b}}
   dr.a.frequency.linearRampToValueAtTime(f,ac.currentTime+1.5);dr.b.frequency.linearRampToValueAtTime(f*1.012,ac.currentTime+1.5);dr.g.gain.linearRampToValueAtTime(sndOn?.05:0,ac.currentTime+1)}catch(e){}}
+var MUS=/[?&]music=1/.test(location.search),mu=null;
+function music(stage){try{if(!MUS||!ac)return;
+  if(!mu){var g=ac.createGain(),f=ac.createBiquadFilter();f.type="lowpass";f.frequency.value=900;g.gain.value=sndOn?1:0;f.connect(g);g.connect(ac.destination);mu={g:g,f:f,t:0,i:0,stage:"off",timer:0}}
+  mu.stage=stage;clearInterval(mu.timer);mu.timer=0;
+  var note=function(fr,at,len,vol,type){var o=ac.createOscillator(),o2=ac.createOscillator(),e=ac.createGain();o.type=type||"sine";o2.type="triangle";o.frequency.value=fr;o2.frequency.value=fr*1.004;
+    e.gain.setValueAtTime(0,at);e.gain.linearRampToValueAtTime(vol,at+Math.min(1.6,len*.35));e.gain.setValueAtTime(vol,at+len*.6);e.gain.linearRampToValueAtTime(0,at+len);o.connect(e);o2.connect(e);e.connect(mu.f);o.start(at);o2.start(at);o.stop(at+len+.1);o2.stop(at+len+.1)};
+  var pluck=function(fr,at,vol){var o=ac.createOscillator(),e=ac.createGain();o.type="triangle";o.frequency.value=fr;e.gain.setValueAtTime(vol,at);e.gain.exponentialRampToValueAtTime(.0001,at+.9);o.connect(e);e.connect(mu.f);o.start(at);o.stop(at+1)};
+  if(stage==="off")return;
+  if(stage.indexOf("end")===0){var maj=stage!=="endguilty",n=ac.currentTime+.05;(maj?[146.83,220,293.66,369.99]:[110,130.81,164.81,220]).forEach(function(fr,k){note(fr,n+k*.12,5.5,.03)});return}
+  var CH=[[146.83,174.61,220],[116.54,146.83,174.61],[130.81,164.81,196],[110,146.83,164.81]],LEN=6;
+  mu.t=Math.max(mu.t,ac.currentTime+.1);
+  var tick=function(){if(!mu||mu.stage==="off"||mu.stage.indexOf("end")===0)return;
+    while(mu.t<ac.currentTime+1.2){var c=CH[mu.i%CH.length],st=mu.stage;
+      if(st==="jury"){note(c[0]/2,mu.t,LEN+1.5,.03)}
+      else{c.forEach(function(fr){note(fr,mu.t,LEN+1.5,.014)});note(c[0]/2,mu.t,LEN+1.5,.02);
+        if(st==="reb")for(var k=0;k<4;k++)pluck(c[k%3]*2,mu.t+k*1.5+.75,.012)}
+      mu.t+=LEN;mu.i++}};
+  tick();mu.timer=setInterval(tick,400)}catch(e){}}
 function gavel(){tone(150,.35,"triangle",.5,42);setTimeout(function(){tone(120,.5,"triangle",.5,36)},170)}
-$("snd").onclick=function(){sndOn=!sndOn;this.setAttribute("aria-pressed",sndOn);this.textContent=sndOn?"סאונד פועל":"סאונד כבוי";if(dr)dr.g.gain.value=sndOn?.05:0};
+$("snd").onclick=function(){sndOn=!sndOn;this.setAttribute("aria-pressed",sndOn);this.textContent=sndOn?"סאונד פועל":"סאונד כבוי";if(dr)dr.g.gain.value=sndOn?.05:0;if(mu)mu.g.gain.value=sndOn?1:0};
 
 /* ---------- asking Claude ---------- */
 var API="https://mxustmseyfshuzqtreym.supabase.co/functions/v1/court",CODE="";
@@ -525,7 +543,7 @@ var step=-1,shown=0,raf=0,tick=0,revealed=0,lastBlip=0;
 var say=$("say"),nextB=$("next");
 function setStep(i){
   step=i;shown=0;var st=STEPS[i];bubble(null);
-  var T={0:"דברי פתיחה",2:"תשובות",4:"המילה האחרונה",5:"חבר המושבעים"}[i];if(T)chapter(T);
+  var T={0:"דברי פתיחה",2:"תשובות",4:"המילה האחרונה",5:"חבר המושבעים"}[i];if(T)chapter(T);if(i===2)music("reb");if(i===5)music("jury");
   [].forEach.call($("steps").children,function(li,j){li.className=j===st.st?"now":j<st.st?"past":""});
   $("score").hidden=!st.jury&&st.k!=="judge";
   document.querySelector(".dialog").classList.toggle("typing",!!st.last);
@@ -573,7 +591,7 @@ function juryFrame(){
 function verdict(){
   var t=S.tally,sl=$("slam");S.hold=true;focus(null);say.className="say";say.textContent="";
   $("slamw").textContent=t.word;$("slamc").textContent=t.count;sl.className="slam show flash "+t.cls;
-  beat(false);drone(0);gavel();$("game").classList.add("shake");fx(t.cls);
+  beat(false);drone(0);music("off");gavel();$("game").classList.add("shake");fx(t.cls);setTimeout(function(){if(S)music("end"+t.cls)},900);
   var c=t.cls==="guilty"?"white":t.cls==="acquitted"||t.cls==="cond"?"blue":"";if(c){A.idea.classList.add(c);A.judge.classList.add(c)}
   setTimeout(function(){sl.classList.remove("flash")},90);
   setTimeout(function(){sl.className="slam";$("game").classList.remove("shake");if(S){S.hold=false;focus("judge",1.15);$("what").textContent=t.line}},2300);
@@ -739,7 +757,7 @@ function appeal(){var me=S;if(!me)return;var g={full:me.c,show:me.show,busy:fals
 $("privb").onclick=function(){var p=$("priv"),o=p.hidden;p.hidden=!o;this.setAttribute("aria-expanded",o);if(o)p.scrollIntoView({block:"nearest"})};
 var codeI=$("codei"),codeB=$("codeb");function showCode(f){codeB.hidden=true;codeI.hidden=false;if(f)codeI.focus()}codeB.onclick=function(){showCode(1)};if(CODE){codeI.value=CODE;showCode()}
 function leave(msg){
-  if(S){S.dead=true;try{S.abort.abort()}catch(e){}}S=null;step=-1;drone(0);beat(false);$("fx").textContent="";$("card").classList.remove("show");document.querySelector(".dialog").classList.remove("typing");$("last").value="";
+  if(S){S.dead=true;try{S.abort.abort()}catch(e){}}S=null;step=-1;drone(0);beat(false);music("off");$("fx").textContent="";$("card").classList.remove("show");document.querySelector(".dialog").classList.remove("typing");$("last").value="";
   $("sheet").classList.remove("show");$("slam").className="slam";$("game").classList.remove("playing","shake");
   build(nJ);focus(null);hint.textContent=msg||HINT;hint.className="hint"+(msg?" warn":"");
 }
@@ -792,7 +810,7 @@ function begin(demo,g,trial){
   var c=demo?DEMO.c:g.full.slice(0,14000);
   S={demo:demo,c:c,show:demo?DEMO.c:g.show,J:demo||jSet==="bm"?JURORS:((g&&g.J)||GEN),lastTxt:"",n:demo?12:nJ,s:{},t:{},queue:[],votes:null,tally:null,mode:demo?"":MODE,abort:new AbortController(),trial:trial||""};
   S.lastP=new Promise(function(r){S.lastDone=r});
-  build(S.n);$("game").classList.add("playing");tone(110,.6,"sine",.2,220);drone(55);
+  build(S.n);$("game").classList.add("playing");tone(110,.6,"sine",.2,220);drone(55);music("open");
   $("tag").className="tag line";$("tag").textContent="בית המשפט";$("what").textContent="";$("score").hidden=true;say.className="say wait";say.textContent="כולם לקום. בית המשפט יושב לדין";nextB.disabled=true;nextB.textContent="המשך";
   S.custom=!!(g&&g.J&&S.J===g.J);var me=S;run(S);setTimeout(function(){if(S===me)lineup(me,function(){gavel();setStep(0)})},1300);
 }
