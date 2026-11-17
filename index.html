@@ -621,7 +621,7 @@ function leadForm(p){
   function field(label,el,wide){var l=h("label",wide?"wide":"",label,f);l.appendChild(el);return el}
   function inp(type,auto){var e=document.createElement("input");e.type=type;if(auto)e.autocomplete=auto;return e}
   var name=field("שם פרטי",inp("text","given-name")),phone=field("טלפון",inp("tel","tel"));phone.dir="ltr";phone.style.textAlign="right";
-  var mail=field("מייל (לא חובה)",inp("email","email"));mail.dir="ltr";mail.style.textAlign="right";
+  var mail=field("מייל",inp("email","email"));mail.dir="ltr";mail.style.textAlign="right";
   var bud=document.createElement("select");["עוד לא יודע","עד 5,000 ₪","5,000 עד 15,000 ₪","15,000 עד 50,000 ₪","מעל 50,000 ₪"].forEach(function(o){h("option","",o,bud)});field("תקציב משוער",bud);
   var goal=field("מה המטרה? מה תרצו שיקרה",document.createElement("textarea"),true);
   var btn=h("button","go","שלחו לבאבמרק",f);btn.type="submit";
@@ -630,7 +630,7 @@ function leadForm(p){
   f.onsubmit=function(e){e.preventDefault();
     var n=name.value.trim(),ph=phone.value.trim();
     if(n.length<2){msg.textContent="חסר שם פרטי.";name.focus();return}
-    if(ph.replace(/\D/g,"").length<9){msg.textContent="חסר מספר טלפון תקין.";phone.focus();return}
+    if(ph.replace(/\D/g,"").length<9){msg.textContent="חסר מספר טלפון תקין.";phone.focus();return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail.value.trim())){msg.textContent="חסר מייל תקין.";mail.focus();return}
     var lead={trial:me.trial||"",name:n,phone:ph,email:mail.value.trim(),budget:bud.value,goals:goal.value.trim().slice(0,1500),case:me.c.slice(0,6000),verdict:t.line,ruling:clean(me.t.judge).slice(0,3000),lastWord:(me.lastW||"").slice(0,1500),jury:me.J===JURORS?"באבמרק":"כללי",at:new Date().toISOString()};
     btn.disabled=true;msg.textContent="שולח";
     saveLead(lead).then(function(){sec.textContent="";h("h3","","התיק אצלנו",sec);h("p","done","תודה "+n+". הצוות של באבמרק יחזור אליך בקרוב.",sec);var mb=h("a","meet","הכירו את באבמרק",sec);mb.href="https://www.babamark.com/";mb.onclick=function(){track("CourtMeet")}},function(){
@@ -643,10 +643,10 @@ function leadForm(p){
 }
 var WF=null;
 function wfPrep(){if(WF||location.protocol==="file:")return;try{var f=document.createElement("iframe");f.src="/contact";f.setAttribute("aria-hidden","true");f.tabIndex=-1;f.style.cssText="position:fixed;left:0;top:0;width:420px;height:900px;opacity:0;pointer-events:none;border:0;z-index:-1";document.body.appendChild(f);WF=f}catch(e){}}
-function wfSend(lead){try{if(!WF)return;var d=WF.contentDocument,fm=d&&d.querySelector("form#email-form");if(!fm)return;
+function wfSend(lead){try{if(!WF||!lead.email)return;var d=WF.contentDocument,fm=d&&d.querySelector("form#email-form");if(!fm)return;
   var set=function(n,v){var e=fm.querySelector('[name="'+n+'"]');if(e){e.value=v;e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}))}};
-  var msg=["ליד מבית המשפט של באבמרק","פסק הדין: "+lead.verdict,"תקציב משוער: "+(lead.budget||"לא צוין"),"מטרה: "+(lead.goals||"לא צוינה")];if(!lead.email)msg.push("מייל: לא נמסר");msg.push("","הרעיון:",String(lead.case||"").slice(0,1500));
-  set("name",lead.name);set("email",lead.email||"court-lead@babamark.com");set("number",lead.phone);set("message",msg.join("\n"));
+  var msg=["ליד מבית המשפט של באבמרק","פסק הדין: "+lead.verdict,"תקציב משוער: "+(lead.budget||"לא צוין"),"מטרה: "+(lead.goals||"לא צוינה")];msg.push("","הרעיון:",String(lead.case||"").slice(0,1500));
+  set("name",lead.name);set("email",lead.email);set("number",lead.phone);set("message",msg.join("\n"));
   var go=function(n){var tk=fm.querySelector('[name="cf-turnstile-response"]');if(tk&&!tk.value&&n>0){setTimeout(function(){go(n-1)},1000);return}
     var b=fm.querySelector('input[type="submit"],button[type="submit"]');if(b)b.click();var w=WF;WF=null;setTimeout(function(){try{w.remove()}catch(e){}},15000)};go(12)}catch(e){}}
 function saveLead(lead){wfSend(lead);
