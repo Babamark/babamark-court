@@ -281,6 +281,7 @@ button{cursor:pointer;border:0;background:none}
 @media (max-width:959px) and (max-height:700px){.title h1{font-size:min(8.4vw,44px);margin-bottom:.5em}.title h1 .logo{width:5.3em}.emb{height:2.25em}}
 @media (max-width:520px){.title textarea{height:104px}.attach .note{flex:1 1 0}.row{gap:10px}.size{flex:1 1 auto}.size button{padding:9px 10px;font-size:14px}#jsize{flex:0 0 auto}#jsize button{min-width:44px}}@media (max-width:380px){.size button{padding:9px 6px;font-size:13px}#jsize button{min-width:38px}.go{flex:1 1 100%;padding:13px 22px}}
 .links{display:flex;flex-wrap:wrap;align-items:center;gap:4px 20px}.codei{background:#000;color:#fff;border:1.5px solid #fff;border-radius:0;padding:6px 10px;font:inherit;font-size:16px;width:11em;margin-top:6px;text-transform:uppercase}.codei::placeholder{text-transform:none;color:#8b8e99}.codei:focus{outline:2px solid var(--blue);outline-offset:2px}
+.game.asking .title{display:none}.intake .iwhy{font-size:1.1em;font-weight:500;line-height:1.45;margin-bottom:.9em;max-width:46ch}.intake .iwhy.wait{color:var(--grey);font-weight:400}.intake .iwhy.wait::after{content:"";display:inline-block;width:.55em;height:1em;margin-inline-start:4px;background:var(--grey);vertical-align:-.15em;animation:blink 1s steps(2) infinite}.iq{padding:.75em 0;border-top:1px solid var(--rule)}.iq label{display:block;font-weight:700;margin-bottom:.45em;line-height:1.4}.iq .ia{display:flex;gap:8px;align-items:stretch}.iq textarea{flex:1;min-width:0;height:3.4em;resize:none;background:#000;color:#fff;border:1.5px solid var(--white);border-radius:0;padding:.45em .65em;font:inherit;font-size:16px;line-height:1.4}.iq textarea:disabled{border-color:var(--rule);color:var(--grey)}.iq .idk{flex:0 0 auto;font-size:14px;padding:0 12px;box-shadow:inset 0 0 0 1.5px var(--rule);color:#d9dbe1}.iq .idk[aria-pressed=true]{background:var(--white);color:var(--black);box-shadow:none;font-weight:700}.iq.miss textarea{border-color:var(--blue);box-shadow:0 0 0 1.5px var(--blue)}@media (max-width:959px){.game.asking .stage{flex:0 0 96px;min-height:96px}.game.asking .panel{max-height:none;flex:1 1 auto}.game.asking .stage svg{scale:1}}
 </style>
 </head>
 <body>
@@ -296,6 +297,7 @@ button{cursor:pointer;border:0;background:none}
   <div class="stage" id="stage"><svg viewBox="0 0 720 470" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity=".03"/></linearGradient><linearGradient id="cgb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a68ff" stop-opacity="0"/><stop offset=".3" stop-color="#5a68ff" stop-opacity=".38"/><stop offset="1" stop-color="#5a68ff" stop-opacity=".05"/></linearGradient></defs><g id="cam"></g></svg><div class="dust" id="dust"></div></div>
 
   <div class="panel">
+    <div class="panel-in intake" id="intake" hidden><div class="who"><span class="tag line">רשם בית המשפט</span><span class="what" id="iround"></span></div><p class="iwhy" id="iwhy"></p><div id="iqs"></div><p class="hint" id="ihint"></p><div class="acts"><button class="next ghost" id="iback">חזרה לתיק</button><button class="next" id="igo">המשך</button></div></div>
     <div class="panel-in title">
       <h1><svg class="emb" viewBox="0 0 100 100" role="img" aria-label="סמל בית המשפט של באבמרק"><rect width="100" height="100" fill="#1929F4"/><g fill="#fff"><g transform="rotate(-40 52 44)"><rect x="26" y="20" width="52" height="24"/><rect x="47" y="44" width="10" height="42"/></g><rect x="14" y="78" width="40" height="9"/></g></svg><span class="lock"><span>בית המשפט של</span><span class="logo" role="img" aria-label="באבמרק"></span></span></h1>
       <p class="sub">מגישים רעיון, הצעה או החלטה. תובע תוקף, סנגור מגן, לך יש מילה אחרונה, וחבר המושבעים מכריע.</p>
@@ -670,7 +672,38 @@ $("quit").onclick=function(){leave("")};
 
 /* ---------- title ---------- */
 var hint=$("hint"),HINT0="המושבעים יודעים רק מה שכתוב כאן ובקבצים.",HINT=HINT0;
-nJ=12;if(window.matchMedia("(max-width:520px)").matches)[].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-label",x.textContent);x.textContent=x.dataset.n});var codeI=$("codei"),codeB=$("codeb");function showCode(f){codeB.hidden=true;codeI.hidden=false;if(f)codeI.focus()}codeB.onclick=function(){showCode(1)};if(CODE){codeI.value=CODE;showCode()}
+nJ=12;if(window.matchMedia("(max-width:520px)").matches)[].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-label",x.textContent);x.textContent=x.dataset.n});var PT=null,IK=null;
+function intake(g,trial){
+  var qa=[],round=0,box=$("intake"),why=$("iwhy"),qs=$("iqs"),ih=$("ihint"),goB=$("igo"),cur=[],me={dead:false};IK=me;
+  $("game").classList.add("asking");box.hidden=false;
+  function close(){me.dead=true;$("game").classList.remove("asking");box.hidden=true;qs.textContent="";ih.textContent=""}
+  function finish(){close();PT=null;
+    if(qa.length){g.full=g.full+"\n\nבירור מקדים מול רשם בית המשפט:\n"+qa.map(function(x){return "שאלה: "+x.q+"\nתשובה: "+x.a}).join("\n");g.show=g.show+"\n\nבבירור המקדים:\n"+qa.map(function(x){return x.q+" "+x.a}).join("\n")}
+    begin(false,g,trial)}
+  function load(){round++;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="המשך";
+    $("iround").textContent="בירור מקדים, סבב "+round+" מתוך 3";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
+    post({op:"ask",trial:trial,key:"intake",c:g.full.slice(0,14000),qa:qa,round:round}).then(function(r){if(me.dead)return;
+      var t=r.text||"",ready=/מצב:\s*מוכן/.test(t),w=(t.match(/חסר:\s*(.+)/)||[])[1]||"",list=[];t.replace(/שאלה:\s*(.+)/g,function(_,q){q=q.trim();if(q&&list.length<4)list.push(q)});
+      if(ready||!list.length)return finish();
+      why.className="iwhy";why.textContent=(w&&!/^כלום/.test(w))?w:"כדי לשפוט את הרעיון לגופו חסרים כמה פרטים.";
+      list.forEach(function(q,i){var d=document.createElement("div");d.className="iq";var l=document.createElement("label");l.textContent=q;l.htmlFor="iq"+i;
+        var a=document.createElement("div");a.className="ia";var ta=document.createElement("textarea");ta.id="iq"+i;ta.maxLength=600;
+        var k=document.createElement("button");k.type="button";k.className="idk";k.textContent="לא יודע";k.setAttribute("aria-pressed","false");
+        k.onclick=function(){var on=k.getAttribute("aria-pressed")!=="true";k.setAttribute("aria-pressed",on);ta.disabled=on;d.classList.remove("miss")};
+        ta.oninput=function(){d.classList.remove("miss")};a.appendChild(ta);a.appendChild(k);d.appendChild(l);d.appendChild(a);qs.appendChild(d);cur.push({q:q,ta:ta,k:k,d:d})});
+      goB.disabled=false;goB.textContent=round>=3?"למשפט":"המשך";box.parentNode.scrollTop=0;if(!window.matchMedia("(pointer:coarse)").matches)cur[0].ta.focus()
+    },function(e){if(me.dead)return;
+      if(e&&(e.code==="closed"||e.code==="limit"||e.code==="trial")){close();PT=null;hint.textContent=e.msg||"בית המשפט סגור כרגע. נסו שוב מאוחר יותר.";hint.className="hint warn";return}
+      round--;why.className="iwhy";why.textContent=(e&&e.code==="busy")?"בית המשפט עמוס כרגע. חכו רגע ונסו שוב.":"החיבור לבית המשפט נקטע.";goB.disabled=false;goB.textContent="נסה שוב"})}
+  goB.onclick=function(){if(!cur.length)return load();
+    var bad=cur.filter(function(x){var ok=x.k.getAttribute("aria-pressed")==="true"||x.ta.value.trim().length>1;x.d.classList.toggle("miss",!ok);return !ok});
+    if(bad.length){ih.textContent="הרשם לא מוותר. ענו על כל שאלה, או סמנו לא יודע.";ih.className="hint warn";bad[0].ta.focus();return}
+    cur.forEach(function(x){qa.push({q:x.q,a:x.k.getAttribute("aria-pressed")==="true"?"לא ידוע למגיש התיק.":x.ta.value.trim()})});
+    if(round>=3)return finish();load()};
+  $("iback").onclick=function(){close();hint.textContent="התיק נשאר פתוח. אפשר להוסיף פרטים ולהגיש שוב.";hint.className="hint"};
+  load();
+}
+var codeI=$("codei"),codeB=$("codeb");function showCode(f){codeB.hidden=true;codeI.hidden=false;if(f)codeI.focus()}codeB.onclick=function(){showCode(1)};if(CODE){codeI.value=CODE;showCode()}
 function leave(msg){
   if(S){S.dead=true;try{S.abort.abort()}catch(e){}}S=null;step=-1;drone(0);beat(false);$("fx").textContent="";$("card").classList.remove("show");document.querySelector(".dialog").classList.remove("typing");$("last").value="";
   $("sheet").classList.remove("show");$("slam").className="slam";$("game").classList.remove("playing","shake");
@@ -721,8 +754,8 @@ $("go").onclick=function(){
   try{localStorage.setItem("court-case",$("case").value.trim())}catch(e){}
   b.disabled=true;b.textContent="פותח את בית המשפט";
   CODE=codeI.value.trim().toUpperCase().slice(0,40);try{if(CODE)localStorage.setItem("court-code",CODE);else localStorage.removeItem("court-code")}catch(e){}
-  post({op:"start",code:CODE,device:DEV}).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
-    track("CourtTrial");begin(false,g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
+  (PT?Promise.resolve({trial:PT}):post({op:"start",code:CODE,device:DEV})).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
+    if(!PT)track("CourtTrial");PT=r.trial;intake(g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
     hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח את בית המשפט. בדקו את החיבור ונסו שוב.";hint.className="hint warn";if(e&&(e.code==="limit"||e.code==="code")){showCode(1);if(e.code==="code")codeI.select()}});
 };
 $("demo").onclick=function(){begin(true)};
