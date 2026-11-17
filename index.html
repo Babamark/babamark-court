@@ -289,6 +289,7 @@ button{cursor:pointer;border:0;background:none}
 .jtag{pointer-events:none}.jtag rect{fill:#fff}.jtag text{fill:#000;font-family:Heebo,sans-serif;font-weight:900;font-size:17px}.say b.jn{display:block;font-weight:900;font-size:1.5em;line-height:1.15}
 .appeal{display:block;margin-top:14px;background:var(--blue);color:#fff;font:inherit;font-weight:700;border:0;border-radius:0;padding:13px 28px;cursor:pointer}.appeal.ap2{margin-top:22px;background:#fff;color:#000}@media (max-width:520px){.appeal{width:100%}}
 .actor.cond polygon{fill:#000;stroke:var(--blue)}.actor.cond .eye{fill:#6b78ff}.score .c{box-shadow:inset 0 0 0 1.5px var(--blue)}.slam.cond strong{background:var(--blue);font-size:clamp(50px,14vw,120px);line-height:1.05}.cond .word strong{background:var(--blue);padding:.08em .14em .12em;font-size:clamp(46px,13vw,104px);line-height:1.1}.seats .cond{border-color:var(--blue);border-width:3px}.jl .cond b{border-color:var(--blue);font-size:11px}
+.bye{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.84);display:grid;place-items:center;padding:20px}.bye[hidden]{display:none}.byein{background:#000;border:1.5px solid #fff;width:100%;max-width:440px;padding:28px 24px 20px;display:flex;flex-direction:column;gap:14px}.byein h3{font-weight:900;font-size:27px;line-height:1.15}.byein p{color:#d9dbe1;font-size:16px;line-height:1.5;margin-bottom:6px}.byeb1,.byeb2{display:block;width:100%;text-align:center;text-decoration:none;font:inherit;font-weight:700;font-size:17px;padding:13px 20px;border:1.5px solid #fff;border-radius:0;cursor:pointer}.byeb1{background:var(--blue);border-color:var(--blue);color:#fff}.byeb2{background:#fff;color:#000}.byel{background:none;border:0;color:#fff;font:inherit;font-size:15px;text-decoration:underline;cursor:pointer;padding:8px;align-self:center}.byeb1:focus-visible,.byeb2:focus-visible,.byel:focus-visible{outline:2px solid #fff;outline-offset:3px}.page footer .about{direction:rtl;align-self:stretch;color:#d9dbe1;font-size:15px;line-height:1.5;margin-top:10px}
 </style>
 </head>
 <body>
@@ -334,7 +335,7 @@ button{cursor:pointer;border:0;background:none}
   </div>
 </div>
 
-<div class="card" id="card"><b id="cardt"></b></div>
+<div class="bye" id="bye" hidden><div class="byein" role="dialog" aria-modal="true" aria-labelledby="byeh"><h3 id="byeh">יוצאים באמצע המשפט?</h3><p>בית המשפט נבנה בבאבמרק, סוכנות מיתוג, שיווק והפקה מתל אביב. יש לכם רעיון אמיתי על השולחן? נשמח להכיר.</p><a class="byeb1" id="byem" href="https://www.babamark.com/" target="_blank" rel="noopener">הכירו את babamark</a><button type="button" class="byeb2" id="byeq">יציאה מהמשפט</button><button type="button" class="byel" id="byeb">חזרה למשפט</button></div></div><div class="card" id="card"><b id="cardt"></b></div>
 <div class="fx" id="fx"></div>
 <div class="slam" id="slam"><div><strong id="slamw"></strong><span class="en" id="slamc"></span></div></div>
 <div class="sheet" id="sheet"><div class="page" id="page"></div></div>
@@ -599,7 +600,7 @@ function openSheet(){
   var hd=h("header","",null,p),d=new Date();h("p","","בית המשפט של באבמרק, "+d.toLocaleDateString("he-IL")+(S.demo?" (דוגמה)":""),hd);var lg=h("span","logo",null,hd);lg.setAttribute("role","img");
   var v=h("section","verdict "+t.cls,null,p);h("h2","","פסק הדין",v);var w=h("p","word",null,v);h("strong","",t.word,w);h("span","en",t.count,w);
   var seats=h("div","seats",null,v);S.votes.forEach(function(r){h("i",cls[r.vote]||"absent",null,seats)});
-  h("p","legend",t.g+" אשם, "+(t.c?t.c+" זכאי בתנאים, ":"")+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){if(S.mode==="quick"){var aq=h("button","appeal ap2","הגישו ערעור עם יותר פרטים",v);aq.type="button";aq.onclick=appeal}var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק":t.cls==="cond"?"רוצים לעמוד בתנאים? ניקח את התיק":"המושבעים חלוקים? ניקח את התיק",v);ap.type="button";ap.onclick=function(){track("CourtTakeCase");if(S&&S.trial)post({op:"mark",trial:S.trial,what:"case"}).catch(function(){});var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
+  h("p","legend",t.g+" אשם, "+(t.c?t.c+" זכאי בתנאים, ":"")+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){if(S.mode==="quick"){var aq=h("button","appeal ap2","הגישו ערעור עם יותר פרטים",v);aq.type="button";aq.onclick=appeal}var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק ונעזור לכם":t.cls==="cond"?"רוצים לעמוד בתנאים? ניקח את התיק ונעזור לכם":"המושבעים חלוקים? ניקח את התיק ונעזור לכם",v);ap.type="button";ap.onclick=function(){track("CourtTakeCase");if(S&&S.trial)post({op:"mark",trial:S.trial,what:"case"}).catch(function(){});var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
   var dl=h("dl","record",null,p);h("dt","","התיק",dl);h("dd","",S.show,dl);h("dt","","האישום",dl);h("dd","",S.mode==="quick"?"הרעיון עצמו לא מחזיק. גם אם ישלימו את מה שחסר, לא שווה להמשיך לפתח אותו.":CHARGE,dl);
   var secs=sections(S.t.judge),sen=null;
   secs.forEach(function(s){if(s.title.indexOf("גזר")>=0){sen=s;return}h("h3","",s.title,p);
@@ -609,7 +610,7 @@ function openSheet(){
     if(r.flip){var f=h("p","flip",null,dv);h("span","","מה היה הופך את ההצבעה",f);f.appendChild(document.createTextNode(r.flip))}});
   if(sen){var sc=h("section","sentence",null,p);h("h3","",sen.title,sc);h("p","",sen.paras.concat(sen.items).join(" "),sc)}
   if(!S.demo)leadForm(p);
-  var ft=h("footer","",null,p);h("span","logo",null,ft);h("p","en tag2","WE MAKE THINGS HAPPEN",ft);h("p","links","@we.make.things.happen · babamark.com",ft);var mt=h("a","meet2","הכירו את באבמרק",ft);mt.href="https://www.babamark.com/";mt.onclick=function(){track("CourtMeet")};
+  var ft=h("footer","",null,p);h("span","logo",null,ft);h("p","en tag2","WE MAKE THINGS HAPPEN",ft);h("p","links","@we.make.things.happen · babamark.com",ft);h("p","about","בית המשפט נבנה בבאבמרק, סוכנות מיתוג, שיווק והפקה מתל אביב. אנחנו עובדים עם מותגים על זהות, קמפיינים, סושיאל ופתרונות AI.",ft);var mt=h("a","meet2","הכירו את babamark",ft);mt.href="https://www.babamark.com/";mt.onclick=function(){track("CourtMeet")};
   $("sheet").classList.add("show");$("sheet").scrollTop=0;
 }
 var MAIL="ab@babamark.com";
@@ -633,7 +634,7 @@ function leadForm(p){
     if(ph.replace(/\D/g,"").length<9){msg.textContent="חסר מספר טלפון תקין.";phone.focus();return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail.value.trim())){msg.textContent="חסר מייל תקין.";mail.focus();return}
     var lead={trial:me.trial||"",name:n,phone:ph,email:mail.value.trim(),budget:bud.value,goals:goal.value.trim().slice(0,1500),case:me.c.slice(0,6000),verdict:t.line,ruling:clean(me.t.judge).slice(0,3000),lastWord:(me.lastW||"").slice(0,1500),jury:me.J===JURORS?"באבמרק":"כללי",at:new Date().toISOString()};
     btn.disabled=true;msg.textContent="שולח";
-    saveLead(lead).then(function(){sec.textContent="";h("h3","","התיק אצלנו",sec);h("p","done","תודה "+n+". הצוות של באבמרק יחזור אליך בקרוב.",sec);var mb=h("a","meet","הכירו את באבמרק",sec);mb.href="https://www.babamark.com/";mb.onclick=function(){track("CourtMeet")}},function(){
+    saveLead(lead).then(function(){sec.textContent="";h("h3","","התיק אצלנו",sec);h("p","done","תודה "+n+". הצוות של באבמרק יחזור אליך בקרוב.",sec);var mb=h("a","meet","הכירו את babamark",sec);mb.href="https://www.babamark.com/";mb.onclick=function(){track("CourtMeet")}},function(){
       btn.disabled=false;msg.textContent="";
       var body="שם: "+lead.name+"\nטלפון: "+lead.phone+"\nמייל: "+lead.email+"\nתקציב: "+lead.budget+"\nמטרה: "+lead.goals+"\n\n"+asText();
       msg.appendChild(document.createTextNode("הפרטים מוכנים. נשאר לשלוח אותם לבאבמרק, ל-"+MAIL+": "));
@@ -685,7 +686,7 @@ $("img").onclick=function(){var b=this;if(!S)return;b.disabled=true;
   }).then(function(){b.textContent="נשמר"},function(){b.textContent="לא נשמר"}).then(function(){b.disabled=false;setTimeout(function(){b.textContent="שמור תמונה"},1800)})};
 window.__card=card;
 $("again").onclick=function(){leave("")};
-$("quit").onclick=function(){leave("")};
+$("quit").onclick=function(){if(S&&!S.demo){$("bye").hidden=false;$("byeb").focus()}else leave("")};$("byeq").onclick=function(){$("bye").hidden=true;leave("")};$("byeb").onclick=function(){$("bye").hidden=true;$("quit").focus()};$("byem").onclick=function(){track("CourtMeet")};document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("bye").hidden){$("bye").hidden=true;$("quit").focus()}});
 
 /* ---------- title ---------- */
 var hint=$("hint"),HINT0="הרעיון נשאר שלכם. הוא מגיע לבאבמרק רק אם תשלחו אותו בסוף המשפט.",HINT=HINT0;
@@ -708,9 +709,9 @@ function intake(g,trial){
       goB.disabled=false;box.parentNode.scrollTop=0},function(){if(me.dead)return;close();go2()})}
   function go2(){$("iback").hidden=false;begin(false,g,trial)}
   function load(){round++;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="המשך";
-    $("iround").textContent=MODE==="deep"?"ערעור, סבב "+round+" מתוך 3":"שאלה קצרה לפני המשפט";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
+    $("iround").textContent=MODE==="deep"?"ערעור, סבב "+round+" מתוך 3":"כמה שאלות לפני המשפט";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
     post({op:"ask",trial:trial,key:"intake",c:g.full.slice(0,14000),qa:qa,round:round,mode:MODE,prev:PREV}).then(function(r){if(me.dead)return;
-      var t=r.text||"",ready=/מצב:\s*מוכן/.test(t),w=(t.match(/חסר:\s*(.+)/)||[])[1]||"",list=[];t.replace(/שאלה:\s*(.+)/g,function(_,q){q=q.trim();if(q&&list.length<(MODE==="deep"?4:2))list.push(q)});
+      var t=r.text||"",ready=/מצב:\s*מוכן/.test(t),w=(t.match(/חסר:\s*(.+)/)||[])[1]||"",list=[];t.replace(/שאלה:\s*(.+)/g,function(_,q){q=q.trim();if(q&&list.length<(MODE==="deep"?4:3))list.push(q)});
       if(ready||!list.length)return finish();
       why.className="iwhy";why.textContent=(w&&!/^כלום/.test(w))?w:"כדי לשפוט את הרעיון לגופו חסרים כמה פרטים.";
       list.forEach(function(q,i){var d=document.createElement("div");d.className="iq";var l=document.createElement("label");l.textContent=q;l.htmlFor="iq"+i;
