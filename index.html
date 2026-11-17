@@ -305,7 +305,7 @@ button{cursor:pointer;border:0;background:none}
       <h1><svg class="emb" viewBox="0 0 100 100" role="img" aria-label="סמל בית המשפט של באבמרק"><rect width="100" height="100" fill="#1929F4"/><g fill="#fff"><g transform="rotate(-40 52 44)"><rect x="26" y="20" width="52" height="24"/><rect x="47" y="44" width="10" height="42"/></g><rect x="14" y="78" width="40" height="9"/></g></svg><span class="lock"><span>בית המשפט של</span><span class="logo" role="img" aria-label="באבמרק"></span></span></h1>
       <p class="sub">מגישים רעיון, הצעה או החלטה. תובע תוקף, סנגור מגן, לך יש מילה אחרונה, וחבר המושבעים מכריע.</p>
       <label for="case">מה עומד למשפט? כותבים כאן או מצרפים קובץ</label>
-      <textarea id="case" placeholder="למשל: להציע לרשת מסעדות ריטיינר חודשי של סושיאל, יום צילום וקמפיינים, 12,000 ₪ בחודש, בלי תקופת התחייבות. כדאי לכתוב מי הלקוח, מספרים, לוח זמנים ומה כבר נוסה."></textarea>
+      <textarea id="case" placeholder="כתבו את הרעיון במילים שלכם: מה אתם רוצים לעשות, למי זה מיועד, כמה כסף וזמן יש לכם, ומה ייחשב הצלחה. ככל שתפרטו יותר, המשפט יהיה מדויק יותר."></textarea>
       <div class="attach"><button class="pick" id="pick">צרף קובץ</button><span class="note">PDF, Word או טקסט. אפשר גם לגרור לכאן.</span><input type="file" id="file" hidden multiple accept=".pdf,.docx,.txt,.md,.csv"></div>
       <ul class="files" id="files"></ul>
       <p class="hint" id="hint">הרעיון נשאר שלכם. הוא מגיע לבאבמרק רק אם תשלחו אותו בסוף המשפט.</p>
@@ -769,7 +769,7 @@ $("demo").onclick=function(){begin(true)};
   [].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-pressed",x===b)});if(!S)build(nJ)}});
 [].forEach.call(document.querySelectorAll("#jset button"),function(b){b.onclick=function(){jSet=b.dataset.j;
   [].forEach.call(document.querySelectorAll("#jset button"),function(x){x.setAttribute("aria-pressed",x===b)})}});
-if(window.matchMedia("(max-width:520px)").matches){$("case").placeholder="למשל: ריטיינר סושיאל לרשת מסעדות, 12,000 ₪ בחודש, בלי התחייבות. כדאי לכתוב מספרים ולוח זמנים.";var nt=document.querySelector(".attach .note");if(nt)nt.textContent=nt.textContent.replace(" אפשר גם לגרור לכאן.","")}
+if(window.matchMedia("(max-width:520px)").matches){$("case").placeholder="מה הרעיון, למי הוא מיועד, כמה כסף וזמן יש, ומה ייחשב הצלחה. כמה שיותר פירוט.";var nt=document.querySelector(".attach .note");if(nt)nt.textContent=nt.textContent.replace(" אפשר גם לגרור לכאן.","")}
 try{var sv=localStorage.getItem("court-case");if(sv)$("case").value=sv}catch(e){}
 
 var DEMO={c:"דוגמה: להציע לרשת המבורגרים ריטיינר חודשי של סושיאל, יום צילום וקמפיינים במטא, בלי תקופת התחייבות.\nתיק לדוגמה, כל הפרטים בדויים. לרשת 4 סניפים. היום הם מעלים תוכן לבד, בלי תקציב פרסום קבוע. ההצעה לא כוללת יעדים מספריים.",
