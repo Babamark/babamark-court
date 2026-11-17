@@ -285,6 +285,7 @@ button{cursor:pointer;border:0;background:none}
 .lead .fine{color:#d9dbe1}.lead .meet{display:inline-block;margin-top:18px;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:12px 28px}@media (max-width:520px){.lead .fine{grid-column:1/-1}.lead .meet{display:block;text-align:center}}
 .priv b{color:#fff;font-weight:700}.priv{font-size:14px;line-height:1.5;color:#d9dbe1;margin-top:8px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--rule);max-width:52ch}
 .page footer .meet2{direction:rtl;margin-top:10px;color:#fff;font-weight:700;text-decoration:none;padding:11px 26px;box-shadow:inset 0 0 0 1.5px var(--white)}.page footer .meet2:hover{background:var(--white);color:var(--black)}
+.jl2{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:.4em}.jl2 li{padding-top:8px;border-top:1px solid var(--rule)}.jl2 b{display:block;font-weight:700}.jl2 span{display:block;font-size:.82em;line-height:1.4;color:#c9ccd4}@media (max-width:520px){.jl2{grid-template-columns:1fr;gap:6px}.jl2 span{display:none}.jl2 li{padding-top:6px}}
 </style>
 </head>
 <body>
@@ -311,7 +312,7 @@ button{cursor:pointer;border:0;background:none}
       <p class="hint" id="hint">הרעיון נשאר שלכם. הוא מגיע לבאבמרק רק אם תשלחו אותו בסוף המשפט.</p>
       <div class="row">
         <div class="size" id="jset" role="group" aria-label="מי שופט">
-          <button data-j="gen" aria-pressed="true">מושבעים כלליים</button><button data-j="bm" aria-pressed="false">השוק של באבמרק</button>
+          <button data-j="gen" aria-pressed="true">מושבעים לפי התיק</button><button data-j="bm" aria-pressed="false">השוק של באבמרק</button>
         </div>
         <div class="size" id="jsize" role="group" aria-label="גודל חבר המושבעים">
           <button data-n="6" aria-pressed="false">6 מושבעים</button><button data-n="12" aria-pressed="true">12 מושבעים</button>
@@ -684,7 +685,17 @@ function intake(g,trial){
   function close(){me.dead=true;$("game").classList.remove("asking");box.hidden=true;qs.textContent="";ih.textContent=""}
   function finish(){close();PT=null;
     if(qa.length){g.full=g.full+"\n\nבירור מקדים מול רשם בית המשפט:\n"+qa.map(function(x){return "שאלה: "+x.q+"\nתשובה: "+x.a}).join("\n");g.show=g.show+"\n\nבבירור המקדים:\n"+qa.map(function(x){return x.q+" "+x.a}).join("\n")}
-    begin(false,g,trial)}
+    if(jSet==="bm")return go2();
+    me.dead=false;$("game").classList.add("asking");box.hidden=false;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="פתחו את המשפט";
+    $("iround").textContent="חבר המושבעים";why.className="iwhy wait";why.textContent="הרשם מרכיב חבר מושבעים לתיק הזה";
+    goB.onclick=function(){close();go2()};$("iback").hidden=true;
+    post({op:"ask",trial:trial,key:"jury",c:g.full.slice(0,14000),n:nJ}).then(function(r){if(me.dead)return;
+      var J=[];(r.text||"").split("\n").forEach(function(l){var m=l.replace(/^[\s\d.\-*)]+/,"").split("|");if(m.length>=2){var nm=m[0].trim().slice(0,40),ln=m.slice(1).join("|").trim().slice(0,300);if(nm.length>1&&ln.length>3&&J.length<nJ)J.push([nm,ln])}});
+      if(J.length<nJ){close();return go2()}
+      g.J=J;why.className="iwhy";why.textContent="אלה "+nJ+" המושבעים שישפטו את הרעיון שלכם.";
+      var ul=document.createElement("ul");ul.className="jl2";J.forEach(function(x){var li=document.createElement("li");var b=document.createElement("b");b.textContent=x[0];li.appendChild(b);var sp=document.createElement("span");sp.textContent=x[1];li.appendChild(sp);ul.appendChild(li)});qs.appendChild(ul);
+      goB.disabled=false;box.parentNode.scrollTop=0},function(){if(me.dead)return;close();go2()})}
+  function go2(){$("iback").hidden=false;begin(false,g,trial)}
   function load(){round++;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="המשך";
     $("iround").textContent="בירור מקדים, סבב "+round+" מתוך 3";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
     post({op:"ask",trial:trial,key:"intake",c:g.full.slice(0,14000),qa:qa,round:round}).then(function(r){if(me.dead)return;
@@ -747,7 +758,7 @@ function gather(){var typed=$("case").value.trim(),ok=att.filter(function(a){ret
 function begin(demo,g,trial){
   try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume()}catch(e){}
   var c=demo?DEMO.c:g.full.slice(0,14000);
-  S={demo:demo,c:c,show:demo?DEMO.c:g.show,J:demo||jSet==="bm"?JURORS:GEN,lastTxt:"",n:demo?12:nJ,s:{},t:{},queue:[],votes:null,tally:null,abort:new AbortController(),trial:trial||""};
+  S={demo:demo,c:c,show:demo?DEMO.c:g.show,J:demo||jSet==="bm"?JURORS:((g&&g.J)||GEN),lastTxt:"",n:demo?12:nJ,s:{},t:{},queue:[],votes:null,tally:null,abort:new AbortController(),trial:trial||""};
   S.lastP=new Promise(function(r){S.lastDone=r});
   build(S.n);$("game").classList.add("playing");tone(110,.6,"sine",.2,220);drone(55);
   $("tag").className="tag line";$("tag").textContent="בית המשפט";$("what").textContent="";$("score").hidden=true;say.className="say wait";say.textContent="כולם לקום. בית המשפט יושב לדין";nextB.disabled=true;nextB.textContent="המשך";
