@@ -287,7 +287,7 @@ button{cursor:pointer;border:0;background:none}
 .page footer .meet2{direction:rtl;margin-top:10px;color:#fff;font-weight:700;text-decoration:none;padding:11px 26px;box-shadow:inset 0 0 0 1.5px var(--white)}.page footer .meet2:hover{background:var(--white);color:var(--black)}
 .jl2{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:.4em}.jl2 li{padding-top:8px;border-top:1px solid var(--rule)}.jl2 b{display:block;font-weight:700}.jl2 span{display:block;font-size:.82em;line-height:1.4;color:#c9ccd4}@media (max-width:520px){.jl2{grid-template-columns:1fr;gap:6px}.jl2 span{display:none}.jl2 li{padding-top:6px}}
 .jtag{pointer-events:none}.jtag rect{fill:#fff}.jtag text{fill:#000;font-family:Heebo,sans-serif;font-weight:900;font-size:17px}.say b.jn{display:block;font-weight:900;font-size:1.5em;line-height:1.15}
-.appeal{display:block;margin-top:22px;background:var(--blue);color:#fff;font:inherit;font-weight:700;border:0;border-radius:0;padding:13px 28px;cursor:pointer}@media (max-width:520px){.appeal{width:100%}}
+.appeal{display:block;margin-top:14px;background:var(--blue);color:#fff;font:inherit;font-weight:700;border:0;border-radius:0;padding:13px 28px;cursor:pointer}.appeal.ap2{margin-top:22px;background:#fff;color:#000}@media (max-width:520px){.appeal{width:100%}}
 </style>
 </head>
 <body>
@@ -466,7 +466,7 @@ function mockAsk(key,i,onText){
 }
 function ask(S,key,i,onText){
   if(S.demo)return mockAsk(key,i,onText);
-  var b={op:"ask",trial:S.trial,key:key,c:S.c,t:{openP:S.t.openP||"",openD:S.t.openD||"",rebP:S.t.rebP||"",rebD:S.t.rebD||""},last:S.lastW||""};
+  var b={op:"ask",trial:S.trial,mode:S.mode||"quick",key:key,c:S.c,t:{openP:S.t.openP||"",openD:S.t.openD||"",rebP:S.t.rebP||"",rebD:S.t.rebD||""},last:S.lastW||""};
   if(key==="juror")b.juror={name:S.J[i][0],lens:S.J[i][1]};
   if(key==="judge"){b.votes=S.votes.map(function(r){return {juror:r.juror,vote:r.vote,reason:r.reason,flip:r.flip}});b.line=S.tally.line}
   return post(b,S.abort.signal).then(function(r){var t=r.text||"";if(!t)throw new Error("empty");onText(t);return t});
@@ -598,7 +598,7 @@ function openSheet(){
   var hd=h("header","",null,p),d=new Date();h("p","","בית המשפט של באבמרק, "+d.toLocaleDateString("he-IL")+(S.demo?" (דוגמה)":""),hd);var lg=h("span","logo",null,hd);lg.setAttribute("role","img");
   var v=h("section","verdict "+t.cls,null,p);h("h2","","פסק הדין",v);var w=h("p","word",null,v);h("strong","",t.word,w);h("span","en",t.count,w);
   var seats=h("div","seats",null,v);S.votes.forEach(function(r){h("i",cls[r.vote]||"absent",null,seats)});
-  h("p","legend",t.g+" אשם, "+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק":"המושבעים חלוקים? ניקח את התיק",v);ap.type="button";ap.onclick=function(){track("CourtAppeal");var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
+  h("p","legend",t.g+" אשם, "+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){if(S.mode==="quick"){var aq=h("button","appeal ap2","הגישו ערעור עם יותר פרטים",v);aq.type="button";aq.onclick=appeal}var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק":"המושבעים חלוקים? ניקח את התיק",v);ap.type="button";ap.onclick=function(){track("CourtTakeCase");var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
   var dl=h("dl","record",null,p);h("dt","","התיק",dl);h("dd","",S.show,dl);h("dt","","האישום",dl);h("dd","",CHARGE,dl);
   var secs=sections(S.t.judge),sen=null;
   secs.forEach(function(s){if(s.title.indexOf("גזר")>=0){sen=s;return}h("h3","",s.title,p);
@@ -680,9 +680,9 @@ $("quit").onclick=function(){leave("")};
 
 /* ---------- title ---------- */
 var hint=$("hint"),HINT0="הרעיון נשאר שלכם. הוא מגיע לבאבמרק רק אם תשלחו אותו בסוף המשפט.",HINT=HINT0;
-nJ=12;if(window.matchMedia("(max-width:520px)").matches)[].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-label",x.textContent);x.textContent=x.dataset.n});var PT=null,IK=null;
+nJ=12;if(window.matchMedia("(max-width:520px)").matches)[].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-label",x.textContent);x.textContent=x.dataset.n});var PT=null,IK=null,MODE="quick",PREV="";
 function intake(g,trial){
-  var qa=[],round=0,box=$("intake"),why=$("iwhy"),qs=$("iqs"),ih=$("ihint"),goB=$("igo"),cur=[],me={dead:false};IK=me;
+  var qa=[],round=0,box=$("intake"),why=$("iwhy"),qs=$("iqs"),ih=$("ihint"),goB=$("igo"),cur=[],me={dead:false},maxR=MODE==="deep"?3:1;IK=me;
   $("game").classList.add("asking");box.hidden=false;
   function close(){me.dead=true;$("game").classList.remove("asking");box.hidden=true;qs.textContent="";ih.textContent=""}
   function finish(){close();PT=null;
@@ -699,9 +699,9 @@ function intake(g,trial){
       goB.disabled=false;box.parentNode.scrollTop=0},function(){if(me.dead)return;close();go2()})}
   function go2(){$("iback").hidden=false;begin(false,g,trial)}
   function load(){round++;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="המשך";
-    $("iround").textContent="בירור מקדים, סבב "+round+" מתוך 3";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
-    post({op:"ask",trial:trial,key:"intake",c:g.full.slice(0,14000),qa:qa,round:round}).then(function(r){if(me.dead)return;
-      var t=r.text||"",ready=/מצב:\s*מוכן/.test(t),w=(t.match(/חסר:\s*(.+)/)||[])[1]||"",list=[];t.replace(/שאלה:\s*(.+)/g,function(_,q){q=q.trim();if(q&&list.length<4)list.push(q)});
+    $("iround").textContent=MODE==="deep"?"ערעור, סבב "+round+" מתוך 3":"שאלה קצרה לפני המשפט";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
+    post({op:"ask",trial:trial,key:"intake",c:g.full.slice(0,14000),qa:qa,round:round,mode:MODE,prev:PREV}).then(function(r){if(me.dead)return;
+      var t=r.text||"",ready=/מצב:\s*מוכן/.test(t),w=(t.match(/חסר:\s*(.+)/)||[])[1]||"",list=[];t.replace(/שאלה:\s*(.+)/g,function(_,q){q=q.trim();if(q&&list.length<(MODE==="deep"?4:2))list.push(q)});
       if(ready||!list.length)return finish();
       why.className="iwhy";why.textContent=(w&&!/^כלום/.test(w))?w:"כדי לשפוט את הרעיון לגופו חסרים כמה פרטים.";
       list.forEach(function(q,i){var d=document.createElement("div");d.className="iq";var l=document.createElement("label");l.textContent=q;l.htmlFor="iq"+i;
@@ -709,7 +709,7 @@ function intake(g,trial){
         var k=document.createElement("button");k.type="button";k.className="idk";k.textContent="לא יודע";k.setAttribute("aria-pressed","false");
         k.onclick=function(){var on=k.getAttribute("aria-pressed")!=="true";k.setAttribute("aria-pressed",on);ta.disabled=on;d.classList.remove("miss")};
         ta.oninput=function(){d.classList.remove("miss")};a.appendChild(ta);a.appendChild(k);d.appendChild(l);d.appendChild(a);qs.appendChild(d);cur.push({q:q,ta:ta,k:k,d:d})});
-      goB.disabled=false;goB.textContent=round>=3?"למשפט":"המשך";box.parentNode.scrollTop=0;if(!window.matchMedia("(pointer:coarse)").matches)cur[0].ta.focus()
+      goB.disabled=false;goB.textContent=round>=maxR?"למשפט":"המשך";box.parentNode.scrollTop=0;if(!window.matchMedia("(pointer:coarse)").matches)cur[0].ta.focus()
     },function(e){if(me.dead)return;
       if(e&&(e.code==="closed"||e.code==="limit"||e.code==="trial")){close();PT=null;hint.textContent=e.msg||"בית המשפט סגור כרגע. נסו שוב מאוחר יותר.";hint.className="hint warn";return}
       round--;why.className="iwhy";why.textContent=(e&&e.code==="busy")?"בית המשפט עמוס כרגע. חכו רגע ונסו שוב.":"החיבור לבית המשפט נקטע.";goB.disabled=false;goB.textContent="נסה שוב"})}
@@ -717,10 +717,15 @@ function intake(g,trial){
     var bad=cur.filter(function(x){var ok=x.k.getAttribute("aria-pressed")==="true"||x.ta.value.trim().length>1;x.d.classList.toggle("miss",!ok);return !ok});
     if(bad.length){ih.textContent="הרשם לא מוותר. ענו על כל שאלה, או סמנו לא יודע.";ih.className="hint warn";bad[0].ta.focus();return}
     cur.forEach(function(x){qa.push({q:x.q,a:x.k.getAttribute("aria-pressed")==="true"?"לא ידוע למגיש התיק.":x.ta.value.trim()})});
-    if(round>=3)return finish();load()};
+    if(round>=maxR)return finish();load()};
   $("iback").onclick=function(){close();hint.textContent="התיק נשאר פתוח. אפשר להוסיף פרטים ולהגיש שוב.";hint.className="hint"};
   load();
 }
+function appeal(){var me=S;if(!me)return;var g={full:me.c,show:me.show,busy:false},prev="";
+  sections(me.t.judge).forEach(function(x){if(x.title.indexOf("תנאים")>=0)prev=x.items.concat(x.paras).join("\n")});
+  track("CourtAppeal");leave("");hint.textContent="פותחים ערעור";hint.className="hint";
+  post({op:"start",code:CODE,device:DEV}).then(function(r){track("CourtTrial");MODE="deep";PREV=prev.slice(0,1500);PT=r.trial;hint.textContent=HINT;intake(g,r.trial)},
+    function(e){hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח ערעור. בדקו את החיבור ונסו שוב.";hint.className="hint warn";if(e&&(e.code==="limit"||e.code==="code"))showCode(1)})}
 $("privb").onclick=function(){var p=$("priv"),o=p.hidden;p.hidden=!o;this.setAttribute("aria-expanded",o);if(o)p.scrollIntoView({block:"nearest"})};
 var codeI=$("codei"),codeB=$("codeb");function showCode(f){codeB.hidden=true;codeI.hidden=false;if(f)codeI.focus()}codeB.onclick=function(){showCode(1)};if(CODE){codeI.value=CODE;showCode()}
 function leave(msg){
@@ -775,7 +780,7 @@ function lineup(me,done){
 function begin(demo,g,trial){
   try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume()}catch(e){}
   var c=demo?DEMO.c:g.full.slice(0,14000);
-  S={demo:demo,c:c,show:demo?DEMO.c:g.show,J:demo||jSet==="bm"?JURORS:((g&&g.J)||GEN),lastTxt:"",n:demo?12:nJ,s:{},t:{},queue:[],votes:null,tally:null,abort:new AbortController(),trial:trial||""};
+  S={demo:demo,c:c,show:demo?DEMO.c:g.show,J:demo||jSet==="bm"?JURORS:((g&&g.J)||GEN),lastTxt:"",n:demo?12:nJ,s:{},t:{},queue:[],votes:null,tally:null,mode:demo?"":MODE,abort:new AbortController(),trial:trial||""};
   S.lastP=new Promise(function(r){S.lastDone=r});
   build(S.n);$("game").classList.add("playing");tone(110,.6,"sine",.2,220);drone(55);
   $("tag").className="tag line";$("tag").textContent="בית המשפט";$("what").textContent="";$("score").hidden=true;say.className="say wait";say.textContent="כולם לקום. בית המשפט יושב לדין";nextB.disabled=true;nextB.textContent="המשך";
@@ -788,7 +793,7 @@ $("go").onclick=function(){
   try{localStorage.setItem("court-case",$("case").value.trim())}catch(e){}
   b.disabled=true;b.textContent="פותח את בית המשפט";
   CODE=codeI.value.trim().toUpperCase().slice(0,40);try{if(CODE)localStorage.setItem("court-code",CODE);else localStorage.removeItem("court-code")}catch(e){}
-  (PT?Promise.resolve({trial:PT}):post({op:"start",code:CODE,device:DEV})).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
+  (PT?Promise.resolve({trial:PT}):(MODE="quick",PREV="",post({op:"start",code:CODE,device:DEV}))).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
     if(!PT)track("CourtTrial");PT=r.trial;intake(g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
     hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח את בית המשפט. בדקו את החיבור ונסו שוב.";hint.className="hint warn";if(e&&(e.code==="limit"||e.code==="code")){showCode(1);if(e.code==="code")codeI.select()}});
 };
