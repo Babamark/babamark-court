@@ -280,6 +280,7 @@ button{cursor:pointer;border:0;background:none}
 }
 @media (max-width:959px) and (max-height:700px){.title h1{font-size:min(8.4vw,44px);margin-bottom:.5em}.title h1 .logo{width:5.3em}.emb{height:2.25em}}
 @media (max-width:520px){.title textarea{height:104px}.attach .note{flex:1 1 0}.row{gap:10px}.size{flex:1 1 auto}.size button{padding:9px 10px;font-size:14px}#jsize{flex:0 0 auto}#jsize button{min-width:44px}}@media (max-width:380px){.size button{padding:9px 6px;font-size:13px}#jsize button{min-width:38px}.go{flex:1 1 100%;padding:13px 22px}}
+.links{display:flex;flex-wrap:wrap;align-items:center;gap:4px 20px}.codei{background:#000;color:#fff;border:1.5px solid #fff;border-radius:0;padding:6px 10px;font:inherit;font-size:16px;width:11em;margin-top:6px;text-transform:uppercase}.codei::placeholder{text-transform:none;color:#8b8e99}.codei:focus{outline:2px solid var(--blue);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -312,7 +313,7 @@ button{cursor:pointer;border:0;background:none}
         </div>
         <button class="go" id="go">פתח את המשפט</button>
       </div>
-      <button class="link" id="demo">צפה במשפט לדוגמה</button>
+      <div class="links"><button class="link" id="demo">צפה במשפט לדוגמה</button><button class="link" id="codeb">יש לי קוד</button><input id="codei" class="codei" hidden maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="הקוד שקיבלתם" aria-label="קוד מבאבמרק"></div>
     </div>
 
     <div class="panel-in dialog">
@@ -431,7 +432,8 @@ $("snd").onclick=function(){sndOn=!sndOn;this.setAttribute("aria-pressed",sndOn)
 
 /* ---------- asking Claude ---------- */
 var API="https://mxustmseyfshuzqtreym.supabase.co/functions/v1/court",CODE="";
-try{var qs=new URLSearchParams(location.search);CODE=(qs.get("code")||qs.get("c")||"").trim().slice(0,40);if(CODE)localStorage.setItem("court-code",CODE);else CODE=localStorage.getItem("court-code")||""}catch(e){}
+try{var qs=new URLSearchParams(location.search);CODE=(qs.get("code")||qs.get("c")||"").trim().toUpperCase().slice(0,40);if(CODE)localStorage.setItem("court-code",CODE);else CODE=localStorage.getItem("court-code")||""}catch(e){}
+var DEV="";try{DEV=localStorage.getItem("court-device")||"";if(DEV.length<16){DEV=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(36)+"-"+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem("court-device",DEV)}}catch(e){}
 function post(body,signal){
   return fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body),signal:signal}).then(function(r){
     return r.json().catch(function(){return {}}).then(function(j){if(!r.ok){var e=new Error(j.message||"");e.code=j.error||"server";e.msg=j.message||"";throw e}return j})});
@@ -668,7 +670,7 @@ $("quit").onclick=function(){leave("")};
 
 /* ---------- title ---------- */
 var hint=$("hint"),HINT0="המושבעים יודעים רק מה שכתוב כאן ובקבצים.",HINT=HINT0;
-nJ=12;if(window.matchMedia("(max-width:520px)").matches)[].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-label",x.textContent);x.textContent=x.dataset.n});if(CODE){HINT="נכנסתם עם הזמנה אישית מבאבמרק.";hint.textContent=HINT}
+nJ=12;if(window.matchMedia("(max-width:520px)").matches)[].forEach.call(document.querySelectorAll("#jsize button"),function(x){x.setAttribute("aria-label",x.textContent);x.textContent=x.dataset.n});var codeI=$("codei"),codeB=$("codeb");function showCode(f){codeB.hidden=true;codeI.hidden=false;if(f)codeI.focus()}codeB.onclick=function(){showCode(1)};if(CODE){codeI.value=CODE;showCode()}
 function leave(msg){
   if(S){S.dead=true;try{S.abort.abort()}catch(e){}}S=null;step=-1;drone(0);beat(false);$("fx").textContent="";$("card").classList.remove("show");document.querySelector(".dialog").classList.remove("typing");$("last").value="";
   $("sheet").classList.remove("show");$("slam").className="slam";$("game").classList.remove("playing","shake");
@@ -718,10 +720,10 @@ $("go").onclick=function(){
   if(c.length<40){hint.textContent="אין עדיין תיק. כתוב משפט או שניים עם פרטים, או צרף קובץ.";hint.className="hint warn";$("case").focus();return}
   try{localStorage.setItem("court-case",$("case").value.trim())}catch(e){}
   b.disabled=true;b.textContent="פותח את בית המשפט";
-  post({op:"start",code:CODE}).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
-    if(CODE&&r.jury<12){CODE="";try{localStorage.removeItem("court-code")}catch(e){}HINT=HINT0}
+  CODE=codeI.value.trim().toUpperCase().slice(0,40);try{if(CODE)localStorage.setItem("court-code",CODE);else localStorage.removeItem("court-code")}catch(e){}
+  post({op:"start",code:CODE,device:DEV}).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
     track("CourtTrial");begin(false,g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
-    hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח את בית המשפט. בדקו את החיבור ונסו שוב.";hint.className="hint warn"});
+    hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח את בית המשפט. בדקו את החיבור ונסו שוב.";hint.className="hint warn";if(e&&(e.code==="limit"||e.code==="code")){showCode(1);if(e.code==="code")codeI.select()}});
 };
 $("demo").onclick=function(){begin(true)};
 [].forEach.call(document.querySelectorAll("#jsize button"),function(b){b.onclick=function(){nJ=+b.dataset.n;
