@@ -287,6 +287,7 @@ button{cursor:pointer;border:0;background:none}
 .page footer .meet2{direction:rtl;margin-top:10px;color:#fff;font-weight:700;text-decoration:none;padding:11px 26px;box-shadow:inset 0 0 0 1.5px var(--white)}.page footer .meet2:hover{background:var(--white);color:var(--black)}
 .jl2{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:.4em}.jl2 li{padding-top:8px;border-top:1px solid var(--rule)}.jl2 b{display:block;font-weight:700}.jl2 span{display:block;font-size:.82em;line-height:1.4;color:#c9ccd4}@media (max-width:520px){.jl2{grid-template-columns:1fr;gap:6px}.jl2 span{display:none}.jl2 li{padding-top:6px}}
 .jtag{pointer-events:none}.jtag rect{fill:#fff}.jtag text{fill:#000;font-family:Heebo,sans-serif;font-weight:900;font-size:17px}.say b.jn{display:block;font-weight:900;font-size:1.5em;line-height:1.15}
+.appeal{display:block;margin-top:22px;background:var(--blue);color:#fff;font:inherit;font-weight:700;border:0;border-radius:0;padding:13px 28px;cursor:pointer}@media (max-width:520px){.appeal{width:100%}}
 </style>
 </head>
 <body>
@@ -597,7 +598,7 @@ function openSheet(){
   var hd=h("header","",null,p),d=new Date();h("p","","בית המשפט של באבמרק, "+d.toLocaleDateString("he-IL")+(S.demo?" (דוגמה)":""),hd);var lg=h("span","logo",null,hd);lg.setAttribute("role","img");
   var v=h("section","verdict "+t.cls,null,p);h("h2","","פסק הדין",v);var w=h("p","word",null,v);h("strong","",t.word,w);h("span","en",t.count,w);
   var seats=h("div","seats",null,v);S.votes.forEach(function(r){h("i",cls[r.vote]||"absent",null,seats)});
-  h("p","legend",t.g+" אשם, "+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);
+  h("p","legend",t.g+" אשם, "+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק":"המושבעים חלוקים? ניקח את התיק",v);ap.type="button";ap.onclick=function(){track("CourtAppeal");var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
   var dl=h("dl","record",null,p);h("dt","","התיק",dl);h("dd","",S.show,dl);h("dt","","האישום",dl);h("dd","",CHARGE,dl);
   var secs=sections(S.t.judge),sen=null;
   secs.forEach(function(s){if(s.title.indexOf("גזר")>=0){sen=s;return}h("h3","",s.title,p);
@@ -613,8 +614,8 @@ function openSheet(){
 var MAIL="ab@babamark.com";
 function leadForm(p){
   var t=S.tally,sec=h("section","lead",null,p),me=S;
-  h("h3","",t.cls==="acquitted"?"רוצים להוציא את זה לפועל?":"רוצים להפוך את זה לזכאי?",sec);
-  h("p","","השאירו פרטים והצוות של באבמרק יחזור אליכם עם מחשבה ראשונה על התיק. התיק ופסק הדין נשלחים יחד עם הפרטים.",sec);
+  h("h3","",t.cls==="acquitted"?"רוצים להוציא את זה לפועל?":"רוצים שנייצג את הרעיון?",sec);
+  h("p","",t.cls==="acquitted"?"השאירו פרטים והצוות של באבמרק יחזור אליכם עם מחשבה ראשונה על התיק. התיק ופסק הדין נשלחים יחד עם הפרטים.":"השאירו פרטים והצוות של באבמרק יעבור איתכם על מה שהמושבעים סימנו ויעזור לבנות תיק חזק יותר. התיק ופסק הדין נשלחים יחד עם הפרטים.",sec);
   var f=h("form","",null,sec);f.noValidate=true;
   function field(label,el,wide){var l=h("label",wide?"wide":"",label,f);l.appendChild(el);return el}
   function inp(type,auto){var e=document.createElement("input");e.type=type;if(auto)e.autocomplete=auto;return e}
