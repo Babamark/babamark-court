@@ -285,6 +285,7 @@ button{cursor:pointer;border:0;background:none}
 .lead .fine{color:#d9dbe1}.lead .meet{display:inline-block;margin-top:18px;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:12px 28px}@media (max-width:520px){.lead .fine{grid-column:1/-1}.lead .meet{display:block;text-align:center}}
 .priv b{color:#fff;font-weight:700}.priv{font-size:14px;line-height:1.5;color:#d9dbe1;margin-top:8px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--rule);max-width:52ch}
 .page footer .meet2{direction:rtl;margin-top:10px;color:#fff;font-weight:700;text-decoration:none;padding:11px 26px;box-shadow:inset 0 0 0 1.5px var(--white)}.page footer .meet2:hover{background:var(--white);color:var(--black)}
+.coderow{display:flex;align-items:center;gap:12px;margin:14px 0 2px}.coderow label{margin:0;font-weight:700}.coderow .codei{margin-top:0}.codei.need{border-color:var(--blue);outline:2px solid var(--blue);outline-offset:2px}
 .jl2{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:.4em}.jl2 li{padding-top:8px;border-top:1px solid var(--rule)}.jl2 b{display:block;font-weight:700}.jl2 span{display:block;font-size:.82em;line-height:1.4;color:#c9ccd4}@media (max-width:520px){.jl2{grid-template-columns:1fr;gap:6px}.jl2 span{display:none}.jl2 li{padding-top:6px}}
 .jtag{pointer-events:none}.jtag rect{fill:#fff}.jtag text{fill:#000;font-family:Heebo,sans-serif;font-weight:900;font-size:17px}.say b.jn{display:block;font-weight:900;font-size:1.5em;line-height:1.15}
 .appeal{display:block;margin-top:14px;background:var(--blue);color:#fff;font:inherit;font-weight:700;border:0;border-radius:0;padding:13px 28px;cursor:pointer}.appeal.ap2{margin-top:22px;background:#fff;color:#000}@media (max-width:520px){.appeal{width:100%}}
@@ -314,6 +315,7 @@ button{cursor:pointer;border:0;background:none}
       <div class="attach"><button class="pick" id="pick">צרף קובץ</button><span class="note">PDF, Word או טקסט. אפשר גם לגרור לכאן.</span><input type="file" id="file" hidden multiple accept=".pdf,.docx,.txt,.md,.csv"></div>
       <ul class="files" id="files"></ul>
       <p class="hint" id="hint">הרעיון נשאר שלכם. הוא מגיע לבאבמרק רק אם תשלחו אותו בסוף המשפט.</p>
+      <div class="coderow"><label for="codei">קוד כניסה</label><input id="codei" class="codei" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="הקוד שקיבלתם"></div>
       <div class="row">
         <div class="size" id="jset" role="group" aria-label="מי שופט">
           <button data-j="gen" aria-pressed="true">מושבעים לפי התיק</button><button data-j="bm" aria-pressed="false">השוק של באבמרק</button>
@@ -323,7 +325,7 @@ button{cursor:pointer;border:0;background:none}
         </div>
         <button class="go" id="go">פתח את המשפט</button>
       </div>
-      <div class="links"><button class="link" id="demo">צפה במשפט לדוגמה</button><button class="link" id="codeb">יש לי קוד</button><button class="link" id="privb" aria-expanded="false">מה קורה עם הרעיון שלי?</button><input id="codei" class="codei" hidden maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="הקוד שקיבלתם" aria-label="קוד מבאבמרק"></div><p class="priv" id="priv" hidden><b>הרעיון והזכויות עליו נשארים שלכם.</b> באבמרק לא שומרת את הרעיון ולא רואה אותו. הוא מגיע אלינו רק אם תמלאו את הטופס בסוף המשפט ותלחצו על שליחה. גם אז נשתמש בו רק כדי לחזור אליכם ולייעץ. לא נשתמש בו, לא נפתח אותו ולא נעביר אותו לאף אחד בלי אישור שלכם בכתב. רעיונות דומים מגיעים אלינו לפעמים מאנשים אחרים, וההתחייבות הזאת היא על מה שאתם שלחתם. המשפט עצמו רץ על מודל AI של Anthropic. הטקסט נשלח אליו רק כדי להריץ את המשפט, לא משמש לאימון המודל, ונמחק שם תוך 30 יום. טיוטה של הטקסט נשמרת בדפדפן שלכם בלבד.</p>
+      <div class="links"><button class="link" id="demo">צפה במשפט לדוגמה</button><button class="link" id="codeb" hidden>יש לי קוד</button><button class="link" id="privb" aria-expanded="false">מה קורה עם הרעיון שלי?</button></div><p class="priv" id="priv" hidden><b>הרעיון והזכויות עליו נשארים שלכם.</b> באבמרק לא שומרת את הרעיון ולא רואה אותו. הוא מגיע אלינו רק אם תמלאו את הטופס בסוף המשפט ותלחצו על שליחה. גם אז נשתמש בו רק כדי לחזור אליכם ולייעץ. לא נשתמש בו, לא נפתח אותו ולא נעביר אותו לאף אחד בלי אישור שלכם בכתב. רעיונות דומים מגיעים אלינו לפעמים מאנשים אחרים, וההתחייבות הזאת היא על מה שאתם שלחתם. המשפט עצמו רץ על מודל AI של Anthropic. הטקסט נשלח אליו רק כדי להריץ את המשפט, לא משמש לאימון המודל, ונמחק שם תוך 30 יום. טיוטה של הטקסט נשמרת בדפדפן שלכם בלבד.</p>
     </div>
 
     <div class="panel-in dialog">
@@ -819,7 +821,8 @@ $("go").onclick=function(){
   if(g.busy){hint.textContent="הקובץ עדיין נקרא. עוד רגע.";hint.className="hint warn";return}
   if(c.length<40){hint.textContent="אין עדיין תיק. כתוב משפט או שניים עם פרטים, או צרף קובץ.";hint.className="hint warn";$("case").focus();return}
   try{localStorage.setItem("court-case",$("case").value.trim())}catch(e){}
-  b.disabled=true;b.textContent="פותח את בית המשפט";
+  if(!PT&&!codeI.value.trim()){hint.textContent="כדי לפתוח משפט צריך קוד כניסה.";hint.className="hint warn";codeI.classList.add("need");codeI.focus();return}
+  codeI.classList.remove("need");b.disabled=true;b.textContent="פותח את בית המשפט";
   CODE=codeI.value.trim().toUpperCase().slice(0,40);try{if(CODE)localStorage.setItem("court-code",CODE);else localStorage.removeItem("court-code")}catch(e){}
   (PT?Promise.resolve({trial:PT}):(MODE="quick",PREV="",post({op:"start",code:CODE,device:DEV}))).then(function(r){b.disabled=false;b.textContent="פתח את המשפט";
     if(!PT)track("CourtTrial");PT=r.trial;intake(g,r.trial)},function(e){b.disabled=false;b.textContent="פתח את המשפט";
