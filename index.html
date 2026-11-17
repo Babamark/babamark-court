@@ -286,6 +286,7 @@ button{cursor:pointer;border:0;background:none}
 .priv b{color:#fff;font-weight:700}.priv{font-size:14px;line-height:1.5;color:#d9dbe1;margin-top:8px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--rule);max-width:52ch}
 .page footer .meet2{direction:rtl;margin-top:10px;color:#fff;font-weight:700;text-decoration:none;padding:11px 26px;box-shadow:inset 0 0 0 1.5px var(--white)}.page footer .meet2:hover{background:var(--white);color:var(--black)}
 .jl2{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:.4em}.jl2 li{padding-top:8px;border-top:1px solid var(--rule)}.jl2 b{display:block;font-weight:700}.jl2 span{display:block;font-size:.82em;line-height:1.4;color:#c9ccd4}@media (max-width:520px){.jl2{grid-template-columns:1fr;gap:6px}.jl2 span{display:none}.jl2 li{padding-top:6px}}
+.jtag{pointer-events:none}.jtag rect{fill:#fff}.jtag text{fill:#000;font-family:Heebo,sans-serif;font-weight:900;font-size:17px}.say b.jn{display:block;font-weight:900;font-size:1.5em;line-height:1.15}
 </style>
 </head>
 <body>
@@ -755,6 +756,21 @@ function gather(){var typed=$("case").value.trim(),ok=att.filter(function(a){ret
   var full=typed+ok.map(function(a){return "\n\nקובץ מצורף, "+a.name+":\n"+a.text}).join("");
   var show=typed+(ok.length?(typed?"\n":"")+"מצורף: "+ok.map(function(a){return a.name}).join(", "):"");
   return {full:full.trim(),show:show,cut:full.length>14000,busy:att.some(function(a){return a.busy})}}
+function lineup(me,done){
+  var i=0,stop=false,tg=el("g",{class:"jtag"},cam),r=el("rect",{},tg),tx=el("text",{"text-anchor":"middle",direction:"rtl"},tg),prev=nextB.onclick;
+  $("tag").className="tag line";$("tag").textContent="חבר המושבעים";say.className="say";
+  nextB.disabled=false;nextB.textContent="דלג";
+  function end(){if(stop)return;stop=true;try{tg.remove()}catch(e){}jur.forEach(function(g){g.classList.remove("on")});stage.classList.remove("focus");
+    nextB.onclick=prev;nextB.disabled=true;nextB.textContent="המשך";$("what").textContent="";if(S===me){say.className="say wait";say.textContent="";done()}}
+  nextB.onclick=end;
+  (function step(){if(stop)return;if(S!==me){stop=true;nextB.onclick=prev;return}if(i>=me.n)return end();
+    jur.forEach(function(g){g.classList.remove("on")});var g=jur[i],J=me.J[i];stage.classList.add("focus");g.classList.add("on");hop(g);tone(300+i*34,.12,"triangle",.07);
+    tx.textContent=J[0];tx.setAttribute("x",g._top[0]);tx.setAttribute("y",g._top[1]-12);
+    try{var bb=tx.getBBox();r.setAttribute("x",bb.x-8);r.setAttribute("y",bb.y-3);r.setAttribute("width",bb.width+16);r.setAttribute("height",bb.height+6)}catch(e){}
+    $("what").textContent=(i+1)+" מתוך "+me.n;say.textContent="";var b=document.createElement("b");b.className="jn";b.textContent=J[0];say.appendChild(b);
+    if(me.custom){var sm=document.createElement("small");sm.textContent=J[1];say.appendChild(sm)}
+    i++;setTimeout(step,me.custom?1100:800)})();
+}
 function begin(demo,g,trial){
   try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume()}catch(e){}
   var c=demo?DEMO.c:g.full.slice(0,14000);
@@ -762,7 +778,7 @@ function begin(demo,g,trial){
   S.lastP=new Promise(function(r){S.lastDone=r});
   build(S.n);$("game").classList.add("playing");tone(110,.6,"sine",.2,220);drone(55);
   $("tag").className="tag line";$("tag").textContent="בית המשפט";$("what").textContent="";$("score").hidden=true;say.className="say wait";say.textContent="כולם לקום. בית המשפט יושב לדין";nextB.disabled=true;nextB.textContent="המשך";
-  var me=S;run(S);setTimeout(function(){if(S===me){gavel();setStep(0)}},1500);
+  S.custom=!!(g&&g.J&&S.J===g.J);var me=S;run(S);setTimeout(function(){if(S===me)lineup(me,function(){gavel();setStep(0)})},1300);
 }
 $("go").onclick=function(){
   var g=gather(),c=g.full,b=this;
