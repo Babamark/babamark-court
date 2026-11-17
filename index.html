@@ -288,6 +288,7 @@ button{cursor:pointer;border:0;background:none}
 .jl2{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:.4em}.jl2 li{padding-top:8px;border-top:1px solid var(--rule)}.jl2 b{display:block;font-weight:700}.jl2 span{display:block;font-size:.82em;line-height:1.4;color:#c9ccd4}@media (max-width:520px){.jl2{grid-template-columns:1fr;gap:6px}.jl2 span{display:none}.jl2 li{padding-top:6px}}
 .jtag{pointer-events:none}.jtag rect{fill:#fff}.jtag text{fill:#000;font-family:Heebo,sans-serif;font-weight:900;font-size:17px}.say b.jn{display:block;font-weight:900;font-size:1.5em;line-height:1.15}
 .appeal{display:block;margin-top:14px;background:var(--blue);color:#fff;font:inherit;font-weight:700;border:0;border-radius:0;padding:13px 28px;cursor:pointer}.appeal.ap2{margin-top:22px;background:#fff;color:#000}@media (max-width:520px){.appeal{width:100%}}
+.actor.cond polygon{fill:#000;stroke:var(--blue)}.actor.cond .eye{fill:#6b78ff}.score .c{box-shadow:inset 0 0 0 1.5px var(--blue)}.slam.cond strong{background:var(--blue);font-size:clamp(50px,14vw,120px);line-height:1.05}.cond .word strong{background:var(--blue);padding:.08em .14em .12em;font-size:clamp(46px,13vw,104px);line-height:1.1}.seats .cond{border-color:var(--blue);border-width:3px}.jl .cond b{border-color:var(--blue);font-size:11px}
 </style>
 </head>
 <body>
@@ -325,7 +326,7 @@ button{cursor:pointer;border:0;background:none}
     </div>
 
     <div class="panel-in dialog">
-      <div class="who"><span class="tag" id="tag"></span><span class="what" id="what"></span><span class="score" id="score" hidden><b class="g" id="sg">0</b><b class="a" id="sa">0</b></span></div>
+      <div class="who"><span class="tag" id="tag"></span><span class="what" id="what"></span><span class="score" id="score" hidden><b class="g" id="sg">0</b><b class="c" id="sc" hidden>0</b><b class="a" id="sa">0</b></span></div>
       <div class="say" id="say" aria-live="polite"></div>
       <textarea class="last" id="last" aria-label="המילה האחרונה שלך" placeholder="התביעה פספסה משהו? יש עובדה שלא כתבת בתיק? זה המקום. אפשר גם להמשיך בלי לכתוב."></textarea>
       <div class="acts"><button class="next ghost" id="quit">צא מהמשפט</button><button class="next" id="next">המשך</button></div>
@@ -476,9 +477,9 @@ function ask(S,key,i,onText){
 var S=null,nJ=6,jSet="gen";
 function clean(t){return (t||"").replace(/\*\*/g,"").replace(/^\s+/,"")}
 function parseVote(t){
-  var m=/^\s*הכרעה\s*:\s*(לא\s+אשם|זכאי|אשם)/m.exec(clean(t).replace(/\*/g,""));if(!m)return null;
+  var m=/^\s*הכרעה\s*:\s*(לא\s+אשם|זכאי\s+בתנאים|זכאי\s+על\s+תנאי|זכאי|אשם)/m.exec(clean(t).replace(/\*/g,""));if(!m)return null;
   function f(n){var r=new RegExp("^\\s*"+n+"\\s*:\\s*(.+)$","m").exec(t.replace(/\*/g,""));return r?r[1].trim():""}
-  return {vote:m[1]==="אשם"?"אשם":"זכאי",reason:f("נימוק"),fact:f("העובדה שהכריעה"),flip:f("מה היה הופך את ההצבעה")};
+  return {vote:m[1]==="אשם"?"אשם":/תנא/.test(m[1])?"זכאי בתנאים":"זכאי",reason:f("נימוק"),fact:f("העובדה שהכריעה"),flip:f("מה היה הופך את ההצבעה")};
 }
 function slot(){return {text:"",done:false,error:null}}
 function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
@@ -506,9 +507,9 @@ function run(S){
     var q=[],i=0;for(;i<S.n;i++)q.push(i);S.votes=new Array(S.n);
     function worker(){if(!q.length)return;var k=q.shift();return juror(S,k,1).then(function(v){S.votes[k]=v;S.queue.push(k);return worker()})}
     return Promise.all([worker(),worker(),worker()])}).then(function(){
-    var g=0,a=0;S.votes.forEach(function(v){if(v.vote==="אשם")g++;else if(v.vote==="זכאי")a++});
-    var w=g>a?"אשם":a>g?"זכאי":"מושבעים חלוקים";
-    S.tally={g:g,a:a,none:S.n-g-a,word:w,cls:g>a?"guilty":a>g?"acquitted":"hung",count:Math.max(g,a)+":"+Math.min(g,a),line:w+", "+g+" אשם מול "+a+" זכאי"};
+    var g=0,a=0,cn=0;S.votes.forEach(function(v){if(v.vote==="אשם")g++;else if(v.vote==="זכאי")a++;else if(v.vote==="זכאי בתנאים")cn++});
+    var fv=a+cn,vcl=g>fv?"guilty":g===fv?"hung":a>cn?"acquitted":"cond",w=vcl==="guilty"?"אשם":vcl==="hung"?"מושבעים חלוקים":vcl==="cond"?"זכאי בתנאים":"זכאי";
+    S.tally={g:g,a:a,c:cn,none:S.n-g-a-cn,word:w,cls:vcl,count:Math.max(g,fv)+":"+Math.min(g,fv),line:w+", "+g+" אשם, "+cn+" זכאי בתנאים, "+a+" זכאי"};if(!S.demo&&S.trial)post({op:"result",trial:S.trial,mode:S.mode||"quick",verdict:vcl,g:g,c:cn,a:a}).catch(function(){});
     return speak(S,"judge")});
 }
 
@@ -555,7 +556,7 @@ function chapter(t){var c=$("card");$("cardt").textContent=t;c.classList.remove(
 function fx(cls){var c=A.idea._c;ring(c,"shock"+(cls==="acquitted"?" blue":""),560,320);setTimeout(function(){ring(c,"shock"+(cls==="acquitted"?" blue":""),560,320)},180);
   if(cls!=="acquitted")return;var box=$("fx");box.textContent="";for(var i=0;i<46;i++){var e=document.createElement("i"),z=6+Math.random()*10;e.style.cssText="left:"+(Math.random()*100)+"%;width:"+z+"px;height:"+z+"px;background:"+(i%3?"#1929F4":"#fff")+";animation-duration:"+(1.6+Math.random()*1.8)+"s;animation-delay:"+(Math.random()*.7)+"s";box.appendChild(e)}setTimeout(function(){box.textContent=""},4500)}
 function startJury(){beat(true);revealed=0;tick=0;say.className="say wait";say.textContent="המושבעים קוראים את הטיעונים";nextB.disabled=true;nextB.textContent="לפסק הדין";upScore()}
-function upScore(){var g=0,a=0;jur.forEach(function(j){if(j.classList.contains("white"))g++;if(j.classList.contains("blue"))a++});$("sg").textContent=g+" אשם";$("sa").textContent=a+" זכאי"}
+function upScore(){var g=0,a=0,cn=0;jur.forEach(function(j){if(j.classList.contains("white"))g++;if(j.classList.contains("blue"))a++;if(j.classList.contains("cond"))cn++});$("sg").textContent=g+" אשם";$("sc").textContent=cn+" בתנאים";$("sc").hidden=!cn;$("sa").textContent=a+" זכאי"}
 function showVote(v){say.className="say";say.textContent="";
   var b=document.createElement("b");b.textContent=v.juror+": "+v.vote;say.appendChild(b);
   say.appendChild(document.createTextNode("\n"+(v.reason||"לא נמסרה הצבעה.")));
@@ -563,16 +564,16 @@ function showVote(v){say.className="say";say.textContent="";
 function juryFrame(){
   var now=performance.now();
   if(revealed<S.queue.length&&now-tick>620){tick=now;var k=S.queue[revealed++],v=S.votes[k],g=jur[k];
-    g.classList.add(v.vote==="אשם"?"white":v.vote==="זכאי"?"blue":"absent","voted");hop(g);ring(g._c,v.vote==="זכאי"?"blue":"");
-    tone(v.vote==="אשם"?220:v.vote==="זכאי"?440:150,.18,"triangle",.2);
-    if(v.vote!=="לא הצביע"){var tx=el("text",{class:"pop"+(v.vote==="זכאי"?" blue":""),x:g._c[0],y:g._c[1]-58},cam);tx.textContent=v.vote;setTimeout(function(){tx.remove()},1600)}showVote(v);upScore();$("what").textContent=revealed+" מתוך "+S.n}
+    var vc=v.vote==="אשם"?"white":v.vote==="זכאי"?"blue":v.vote==="זכאי בתנאים"?"cond":"absent";g.classList.add(vc,"voted");hop(g);ring(g._c,vc==="blue"||vc==="cond"?"blue":"");
+    tone(vc==="white"?220:vc==="blue"?440:vc==="cond"?330:150,.18,"triangle",.2);
+    if(v.vote!=="לא הצביע"){var tx=el("text",{class:"pop"+(vc==="blue"||vc==="cond"?" blue":""),x:g._c[0],y:g._c[1]-58},cam);tx.textContent=vc==="cond"?"בתנאים":v.vote;setTimeout(function(){tx.remove()},1600)}showVote(v);upScore();$("what").textContent=revealed+" מתוך "+S.n}
   if(revealed>=S.n&&S.tally){nextB.disabled=false;if(beatT)beat(false)}
 }
 function verdict(){
   var t=S.tally,sl=$("slam");S.hold=true;focus(null);say.className="say";say.textContent="";
   $("slamw").textContent=t.word;$("slamc").textContent=t.count;sl.className="slam show flash "+t.cls;
   beat(false);drone(0);gavel();$("game").classList.add("shake");fx(t.cls);
-  var c=t.cls==="guilty"?"white":t.cls==="acquitted"?"blue":"";if(c){A.idea.classList.add(c);A.judge.classList.add(c)}
+  var c=t.cls==="guilty"?"white":t.cls==="acquitted"||t.cls==="cond"?"blue":"";if(c){A.idea.classList.add(c);A.judge.classList.add(c)}
   setTimeout(function(){sl.classList.remove("flash")},90);
   setTimeout(function(){sl.className="slam";$("game").classList.remove("shake");if(S){S.hold=false;focus("judge",1.15);$("what").textContent=t.line}},2300);
 }
@@ -594,12 +595,12 @@ function h(tag,cls,txt,parent){var e=document.createElement(tag);if(cls)e.classN
 function sections(md){var out=[],cur=null;clean(md).split("\n").forEach(function(l){l=l.trim();if(!l)return;var m=/^#{1,3}\s*(.+)$/.exec(l);
   if(m){cur={title:m[1],items:[],paras:[]};out.push(cur)}else if(cur){var it=/^(?:\d+[.)]|[-•])\s+(.+)$/.exec(l);if(it)cur.items.push(it[1]);else cur.paras.push(l)}});return out}
 function openSheet(){
-  var t=S.tally,p=$("page"),cls={"אשם":"guilty","זכאי":"acquitted"};p.textContent="";
+  var t=S.tally,p=$("page"),cls={"אשם":"guilty","זכאי":"acquitted","זכאי בתנאים":"cond"};p.textContent="";
   var hd=h("header","",null,p),d=new Date();h("p","","בית המשפט של באבמרק, "+d.toLocaleDateString("he-IL")+(S.demo?" (דוגמה)":""),hd);var lg=h("span","logo",null,hd);lg.setAttribute("role","img");
   var v=h("section","verdict "+t.cls,null,p);h("h2","","פסק הדין",v);var w=h("p","word",null,v);h("strong","",t.word,w);h("span","en",t.count,w);
   var seats=h("div","seats",null,v);S.votes.forEach(function(r){h("i",cls[r.vote]||"absent",null,seats)});
-  h("p","legend",t.g+" אשם, "+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){if(S.mode==="quick"){var aq=h("button","appeal ap2","הגישו ערעור עם יותר פרטים",v);aq.type="button";aq.onclick=appeal}var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק":"המושבעים חלוקים? ניקח את התיק",v);ap.type="button";ap.onclick=function(){track("CourtTakeCase");var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
-  var dl=h("dl","record",null,p);h("dt","","התיק",dl);h("dd","",S.show,dl);h("dt","","האישום",dl);h("dd","",CHARGE,dl);
+  h("p","legend",t.g+" אשם, "+(t.c?t.c+" זכאי בתנאים, ":"")+t.a+" זכאי"+(t.none?", "+t.none+" לא הצביעו":""),v);if(!S.demo&&t.cls!=="acquitted"){if(S.mode==="quick"){var aq=h("button","appeal ap2","הגישו ערעור עם יותר פרטים",v);aq.type="button";aq.onclick=appeal}var ap=h("button","appeal",t.cls==="guilty"?"יצאתם אשמים? ניקח את התיק":t.cls==="cond"?"רוצים לעמוד בתנאים? ניקח את התיק":"המושבעים חלוקים? ניקח את התיק",v);ap.type="button";ap.onclick=function(){track("CourtTakeCase");if(S&&S.trial)post({op:"mark",trial:S.trial,what:"case"}).catch(function(){});var l=p.querySelector(".lead");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}}
+  var dl=h("dl","record",null,p);h("dt","","התיק",dl);h("dd","",S.show,dl);h("dt","","האישום",dl);h("dd","",S.mode==="quick"?"הרעיון עצמו לא מחזיק. גם אם ישלימו את מה שחסר, לא שווה להמשיך לפתח אותו.":CHARGE,dl);
   var secs=sections(S.t.judge),sen=null;
   secs.forEach(function(s){if(s.title.indexOf("גזר")>=0){sen=s;return}h("h3","",s.title,p);
     if(s.items.length){var ol=h("ol","rl",null,p);s.items.forEach(function(x){h("span","",x,h("li","",null,ol))})}s.paras.forEach(function(x){h("p","",x,p)})});
@@ -614,7 +615,7 @@ function openSheet(){
 var MAIL="ab@babamark.com";
 function leadForm(p){
   var t=S.tally,sec=h("section","lead",null,p),me=S;
-  h("h3","",t.cls==="acquitted"?"רוצים להוציא את זה לפועל?":"רוצים שנייצג את הרעיון?",sec);
+  h("h3","",t.cls==="acquitted"?"רוצים להוציא את זה לפועל?":t.cls==="cond"?"רוצים עזרה לעמוד בתנאים?":"רוצים שנייצג את הרעיון?",sec);
   h("p","",t.cls==="acquitted"?"השאירו פרטים והצוות של באבמרק יחזור אליכם עם מחשבה ראשונה על התיק. התיק ופסק הדין נשלחים יחד עם הפרטים.":"השאירו פרטים והצוות של באבמרק יעבור איתכם על מה שהמושבעים סימנו ויעזור לבנות תיק חזק יותר. התיק ופסק הדין נשלחים יחד עם הפרטים.",sec);
   var f=h("form","",null,sec);f.noValidate=true;
   function field(label,el,wide){var l=h("label",wide?"wide":"",label,f);l.appendChild(el);return el}
@@ -630,7 +631,7 @@ function leadForm(p){
     var n=name.value.trim(),ph=phone.value.trim();
     if(n.length<2){msg.textContent="חסר שם פרטי.";name.focus();return}
     if(ph.replace(/\D/g,"").length<9){msg.textContent="חסר מספר טלפון תקין.";phone.focus();return}
-    var lead={name:n,phone:ph,email:mail.value.trim(),budget:bud.value,goals:goal.value.trim().slice(0,1500),case:me.c.slice(0,6000),verdict:t.line,ruling:clean(me.t.judge).slice(0,3000),lastWord:(me.lastW||"").slice(0,1500),jury:me.J===JURORS?"באבמרק":"כללי",at:new Date().toISOString()};
+    var lead={trial:me.trial||"",name:n,phone:ph,email:mail.value.trim(),budget:bud.value,goals:goal.value.trim().slice(0,1500),case:me.c.slice(0,6000),verdict:t.line,ruling:clean(me.t.judge).slice(0,3000),lastWord:(me.lastW||"").slice(0,1500),jury:me.J===JURORS?"באבמרק":"כללי",at:new Date().toISOString()};
     btn.disabled=true;msg.textContent="שולח";
     saveLead(lead).then(function(){sec.textContent="";h("h3","","התיק אצלנו",sec);h("p","done","תודה "+n+". הצוות של באבמרק יחזור אליך בקרוב.",sec);var mb=h("a","meet","הכירו את באבמרק",sec);mb.href="https://www.babamark.com/";mb.onclick=function(){track("CourtMeet")}},function(){
       btn.disabled=false;msg.textContent="";
@@ -641,7 +642,7 @@ function leadForm(p){
       c.onclick=function(){try{navigator.clipboard.writeText(body).then(function(){c.textContent="הועתק"},function(){c.textContent="ההעתקה נחסמה"})}catch(x){c.textContent="ההעתקה נחסמה"}}})};
 }
 function saveLead(lead){
-  return Promise.race([post({op:"lead",name:lead.name,phone:lead.phone,email:lead.email,budget:lead.budget,goals:lead.goals,case:lead.case,verdict:lead.verdict,ruling:lead.ruling,lastWord:lead.lastWord,jury:lead.jury}),new Promise(function(_,rej){setTimeout(rej,12000)})]).then(function(r){track("CourtLead");try{if(window.fbq)window.fbq("track","Lead")}catch(e){}return r});
+  return Promise.race([post({op:"lead",trial:lead.trial,name:lead.name,phone:lead.phone,email:lead.email,budget:lead.budget,goals:lead.goals,case:lead.case,verdict:lead.verdict,ruling:lead.ruling,lastWord:lead.lastWord,jury:lead.jury}),new Promise(function(_,rej){setTimeout(rej,12000)})]).then(function(r){track("CourtLead");try{if(window.fbq)window.fbq("track","Lead")}catch(e){}return r});
 }
 function asText(){var t=S.tally,o=["פסק הדין: "+t.line,"","התיק: "+S.show,"",clean(S.t.judge).replace(/^##\s*/gm,""),"","המושבעים:"];
   S.votes.forEach(function(r){o.push(r.juror+": "+r.vote+". "+r.reason)});return o.join("\n")}
@@ -654,12 +655,12 @@ function card(){
   x.direction="rtl";x.textAlign="right";x.textBaseline="alphabetic";
   x.fillStyle="#1929F4";x.fillRect(W-80-96,64,96,96);x.save();x.translate(W-80-96,64);x.scale(.96,.96);x.fillStyle="#fff";x.fillRect(14,78,40,9);x.translate(52,44);x.rotate(-40*Math.PI/180);x.translate(-52,-44);x.fillRect(26,20,52,24);x.fillRect(47,44,10,42);x.restore();
   x.fillStyle="#9a9da8";x.font="500 34px Heebo";x.fillText("בית המשפט של",W-80-96-24,124);
-  x.fillStyle="#fff";x.font="900 "+(t.cls==="hung"?150:330)+"px Heebo";var wd=x.measureText(t.word).width,by=t.cls==="hung"?420:470;
-  if(t.cls==="acquitted"){x.fillStyle=blue;x.fillRect(W-80-wd-30,by-270,wd+60,330);x.fillStyle="#fff"}
+  x.fillStyle="#fff";var sm=t.cls==="hung"||t.cls==="cond";x.font="900 "+(sm?150:330)+"px Heebo";var wd=x.measureText(t.word).width,by=sm?420:470;
+  if(t.cls==="acquitted"){x.fillStyle=blue;x.fillRect(W-80-wd-30,by-270,wd+60,330);x.fillStyle="#fff"}if(t.cls==="cond"){x.fillStyle=blue;x.fillRect(W-80-wd-30,by-128,wd+60,170);x.fillStyle="#fff"}
   x.fillText(t.word,W-80,by);
-  x.direction="ltr";x.textAlign="left";x.font='700 150px "Fb MatritsaEn"';var room=W-80-wd-(t.cls==="acquitted"?30:0)-130,cw=x.measureText(t.count).width;if(cw>room)x.font='700 '+Math.max(60,Math.floor(150*room/cw))+'px "Fb MatritsaEn"';x.fillText(t.count,80,by);
+  x.direction="ltr";x.textAlign="left";x.font='700 150px "Fb MatritsaEn"';var room=W-80-wd-(t.cls==="acquitted"||t.cls==="cond"?30:0)-130,cw=x.measureText(t.count).width;if(cw>room)x.font='700 '+Math.max(60,Math.floor(150*room/cw))+'px "Fb MatritsaEn"';x.fillText(t.count,80,by);
   var n=S.votes.length,gap=10,sz=Math.min(80,(W-160-gap*(n-1))/n),sy=560;
-  S.votes.forEach(function(r,k){var sx=W-80-sz-k*(sz+gap);if(r.vote==="אשם"){x.fillStyle="#fff";x.fillRect(sx,sy,sz,sz)}else if(r.vote==="זכאי"){x.fillStyle=blue;x.fillRect(sx,sy,sz,sz)}else{x.strokeStyle="#9a9da8";x.lineWidth=3;x.strokeRect(sx+1.5,sy+1.5,sz-3,sz-3)}});
+  S.votes.forEach(function(r,k){var sx=W-80-sz-k*(sz+gap);if(r.vote==="אשם"){x.fillStyle="#fff";x.fillRect(sx,sy,sz,sz)}else if(r.vote==="זכאי"){x.fillStyle=blue;x.fillRect(sx,sy,sz,sz)}else if(r.vote==="זכאי בתנאים"){x.strokeStyle=blue;x.lineWidth=6;x.strokeRect(sx+3,sy+3,sz-6,sz-6)}else{x.strokeStyle="#9a9da8";x.lineWidth=3;x.strokeRect(sx+1.5,sy+1.5,sz-3,sz-3)}});
   x.direction="rtl";x.textAlign="right";x.fillStyle="#fff";x.font="700 46px Heebo";
   var words=S.show.split("\n")[0].split(/\s+/),line="",y=760,rows=0;
   for(i=0;i<words.length&&rows<5;i++){var tr=line?line+" "+words[i]:words[i];if(x.measureText(tr).width>W-160&&line){x.fillText(line,W-80,y);y+=64;rows++;line=words[i]}else line=tr}
@@ -723,7 +724,7 @@ function intake(g,trial){
 }
 function appeal(){var me=S;if(!me)return;var g={full:me.c,show:me.show,busy:false},prev="";
   sections(me.t.judge).forEach(function(x){if(x.title.indexOf("תנאים")>=0)prev=x.items.concat(x.paras).join("\n")});
-  track("CourtAppeal");leave("");hint.textContent="פותחים ערעור";hint.className="hint";
+  track("CourtAppeal");if(me.trial)post({op:"mark",trial:me.trial,what:"appeal"}).catch(function(){});leave("");hint.textContent="פותחים ערעור";hint.className="hint";
   post({op:"start",code:CODE,device:DEV}).then(function(r){track("CourtTrial");MODE="deep";PREV=prev.slice(0,1500);PT=r.trial;hint.textContent=HINT;intake(g,r.trial)},
     function(e){hint.textContent=(e&&e.msg)||"לא הצלחנו לפתוח ערעור. בדקו את החיבור ונסו שוב.";hint.className="hint warn";if(e&&(e.code==="limit"||e.code==="code"))showCode(1)})}
 $("privb").onclick=function(){var p=$("priv"),o=p.hidden;p.hidden=!o;this.setAttribute("aria-expanded",o);if(o)p.scrollIntoView({block:"nearest"})};
