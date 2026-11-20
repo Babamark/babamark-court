@@ -601,7 +601,7 @@ function verdict(){
 nextB.onclick=function(){
   if(!S||step<0)return;var st=STEPS[step];
   if(st.jury){setStep(step+1);return}
-  if(st.last){S.lastDone($("last").value.trim().slice(0,1500));drone(82);setStep(step+1);return}
+  if(st.last){S.lastDone($("last").value.trim());drone(82);setStep(step+1);return}
   var sl=S.s[st.k];if(!sl)return;
   if(sl.error&&sl.retry){var r=sl.retry;sl.retry=null;sl.error=null;r();return}
   var full=view(st,clean(sl.text));
@@ -652,7 +652,7 @@ function leadForm(p){
     var n=name.value.trim(),ph=phone.value.trim();
     if(n.length<2){msg.textContent="חסר שם פרטי.";name.focus();return}
     if(ph.replace(/\D/g,"").length<9){msg.textContent="חסר מספר טלפון תקין.";phone.focus();return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail.value.trim())){msg.textContent="חסר מייל תקין.";mail.focus();return}
-    var lead={trial:me.trial||"",name:n,phone:ph,email:mail.value.trim(),budget:bud.value,goals:goal.value.trim().slice(0,1500),case:me.c.slice(0,6000),verdict:t.line,ruling:clean(me.t.judge).slice(0,3000),lastWord:(me.lastW||"").slice(0,1500),jury:me.J===JURORS?"באבמרק":"כללי",at:new Date().toISOString()};
+    var lead={trial:me.trial||"",name:n,phone:ph,email:mail.value.trim(),budget:bud.value,goals:goal.value.trim(),case:me.c,verdict:t.line,ruling:clean(me.t.judge).slice(0,3000),lastWord:(me.lastW||""),jury:me.J===JURORS?"באבמרק":"כללי",at:new Date().toISOString()};
     btn.disabled=true;msg.textContent="שולח";
     saveLead(lead).then(function(){sec.textContent="";h("h3","","התיק אצלנו",sec);h("p","done","תודה "+n+". הצוות של באבמרק יחזור אליך בקרוב.",sec);var mb=h("a","meet","הכירו את babamark",sec);mb.href="https://www.babamark.com/";mb.onclick=function(){track("CourtMeet")}},function(){
       btn.disabled=false;msg.textContent="";
@@ -721,7 +721,7 @@ function intake(g,trial){
     me.dead=false;$("game").classList.add("asking");box.hidden=false;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="פתחו את המשפט";
     $("iround").textContent="חבר המושבעים";why.className="iwhy wait";why.textContent="הרשם מרכיב חבר מושבעים לתיק הזה";
     goB.onclick=function(){close();go2()};$("iback").hidden=true;
-    post({op:"ask",trial:trial,key:"jury",c:g.full.slice(0,14000),n:nJ}).then(function(r){if(me.dead)return;
+    post({op:"ask",trial:trial,key:"jury",c:g.full,n:nJ}).then(function(r){if(me.dead)return;
       var J=[];(r.text||"").split("\n").forEach(function(l){var m=l.replace(/^[\s\d.\-*)]+/,"").split("|");if(m.length>=2){var nm=m[0].trim().slice(0,40),ln=m.slice(1).join("|").trim().slice(0,300);if(nm.length>1&&ln.length>3&&J.length<nJ)J.push([nm,ln])}});
       if(J.length<nJ){close();return go2()}
       g.J=J;why.className="iwhy";why.textContent="אלה "+nJ+" המושבעים שישפטו את הרעיון שלכם.";
@@ -730,12 +730,12 @@ function intake(g,trial){
   function go2(){$("iback").hidden=false;begin(false,g,trial)}
   function load(){round++;cur=[];qs.textContent="";ih.textContent="";ih.className="hint";goB.disabled=true;goB.textContent="המשך";
     $("iround").textContent=MODE==="deep"?"ערעור, סבב "+round+" מתוך 3":"כמה שאלות לפני המשפט";why.className="iwhy wait";why.textContent=round===1?"הרשם קורא את התיק":"הרשם בודק את התשובות";
-    post({op:"ask",trial:trial,key:"intake",c:g.full.slice(0,14000),qa:qa,round:round,mode:MODE,prev:PREV}).then(function(r){if(me.dead)return;
+    post({op:"ask",trial:trial,key:"intake",c:g.full,qa:qa,round:round,mode:MODE,prev:PREV}).then(function(r){if(me.dead)return;
       var t=r.text||"",ready=/מצב:\s*מוכן/.test(t),w=(t.match(/חסר:\s*(.+)/)||[])[1]||"",list=[];t.replace(/שאלה:\s*(.+)/g,function(_,q){q=q.trim();if(q&&list.length<(MODE==="deep"?4:3))list.push(q)});
       if(ready||!list.length)return finish();
       why.className="iwhy";why.textContent=(w&&!/^כלום/.test(w))?w:"כדי לשפוט את הרעיון לגופו חסרים כמה פרטים.";
       list.forEach(function(q,i){var d=document.createElement("div");d.className="iq";var l=document.createElement("label");l.textContent=q;l.htmlFor="iq"+i;
-        var a=document.createElement("div");a.className="ia";var ta=document.createElement("textarea");ta.id="iq"+i;ta.maxLength=600;
+        var a=document.createElement("div");a.className="ia";var ta=document.createElement("textarea");ta.id="iq"+i;
         var k=document.createElement("button");k.type="button";k.className="idk";k.textContent="לא יודע";k.setAttribute("aria-pressed","false");
         k.onclick=function(){var on=k.getAttribute("aria-pressed")!=="true";k.setAttribute("aria-pressed",on);ta.disabled=on;d.classList.remove("miss")};
         ta.oninput=function(){d.classList.remove("miss")};a.appendChild(ta);a.appendChild(k);d.appendChild(l);d.appendChild(a);qs.appendChild(d);cur.push({q:q,ta:ta,k:k,d:d})});
@@ -791,7 +791,7 @@ $("file").onchange=function(){addFiles(this.files);this.value=""};
 function gather(){var typed=$("case").value.trim(),ok=att.filter(function(a){return a.text});
   var full=typed+ok.map(function(a){return "\n\nקובץ מצורף, "+a.name+":\n"+a.text}).join("");
   var show=typed+(ok.length?(typed?"\n":"")+"מצורף: "+ok.map(function(a){return a.name}).join(", "):"");
-  return {full:full.trim(),show:show,cut:full.length>14000,busy:att.some(function(a){return a.busy})}}
+  return {full:full.trim(),show:show,busy:att.some(function(a){return a.busy})}}
 function lineup(me,done){
   var i=0,stop=false,tg=el("g",{class:"jtag"},cam),r=el("rect",{},tg),tx=el("text",{"text-anchor":"middle",direction:"rtl"},tg),prev=nextB.onclick;
   $("tag").className="tag line";$("tag").textContent="חבר המושבעים";say.className="say";
@@ -809,7 +809,7 @@ function lineup(me,done){
 }
 function begin(demo,g,trial){
   try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume()}catch(e){}
-  var c=demo?DEMO.c:g.full.slice(0,14000);
+  var c=demo?DEMO.c:g.full;
   S={demo:demo,c:c,show:demo?DEMO.c:g.show,J:demo||jSet==="bm"?JURORS:((g&&g.J)||GEN),lastTxt:"",n:demo?12:nJ,s:{},t:{},queue:[],votes:null,tally:null,mode:demo?"":MODE,abort:new AbortController(),trial:trial||""};
   S.lastP=new Promise(function(r){S.lastDone=r});
   build(S.n);$("game").classList.add("playing");tone(110,.6,"sine",.2,220);drone(55);music("open");
